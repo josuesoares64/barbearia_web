@@ -24,3 +24,43 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 1. Remove o marcador padrão (seta/triângulo) em todos os navegadores */
+.faq-details summary {
+    list-style: none; /* Chrome, Edge, Safari, Opera */
+    padding-right: 40px; /* Garante espaço para o nosso ícone personalizado */
+    position: relative;
+    cursor: pointer;
+}
+
+.faq-details summary::-webkit-details-marker {
+    display: none; /* Chrome, Edge, Safari */
+}
+
+.faq-details summary::marker {
+    display: none; /* Firefox */
+}
+
+/* 2. Adiciona o ícone '+' (Estado Fechado) */
+.faq-details summary::after {
+    content: '+';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #cc8400; /* Cor Âmbar/Dourado */
+    transition: transform 0.3s ease;
+}
+
+/* 3. Altera o ícone para '-' (Estado Aberto) */
+/* Usa o seletor [open] no elemento <details> para mudar o ícone */
+.faq-details[open] summary::after {
+    content: '-';
+}
+
+/* Opcional: Efeito visual ao abrir/fechar */
+.faq-details[open] summary {
+    color: #000000; /* Escurece o texto da pergunta quando aberta */
+}

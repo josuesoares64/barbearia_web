@@ -11,8 +11,8 @@ export default function Home() {
       <Hero />
       <Sobre />
       <Servicos />
-      <Localizacao />
       <PerguntasFrequentes />
+      <Localizacao />
     </main>
   );
 }
