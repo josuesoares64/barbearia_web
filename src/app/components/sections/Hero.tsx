@@ -23,7 +23,7 @@ const Hero = () => {
               <Link href="#">Agendar horário</Link>
             </span>
           </button>
-          <button className="relative bg-black px-5 py-2 overflow-hidden font-semibold text-white rounded-md border border-white group">
+          <button className="relative px-5 py-2 overflow-hidden font-semibold text-white rounded-md border border-white group">
             <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-gray-200 to-white translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
 
             <span className="relative text-white group-hover:text-black transition-colors lg:text-3xl duration-300">

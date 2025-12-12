@@ -28,8 +28,8 @@ const Menu = () => {
       <ul className="hidden md:flex md:gap-2 lg:gap-6 xl:text-2xl uppercase text-white font-semibold">
         <li><Link href="#">Sobre</Link></li>
         <li><Link href="#">Serviços</Link></li>
-        <li><Link href="#">Galeria</Link></li>
         <li><Link href="#">Localização</Link></li>
+        <li><Link href="#">FAQ</Link></li>
         <li><Link href="#">Contato</Link></li>
       </ul>
 
@@ -38,8 +38,8 @@ const Menu = () => {
         <ul className="absolute top-[70px] right-0 bg-black w-full flex flex-col gap-6 py-6 px-6 uppercase text-white font-semibold md:hidden shadow-lg">
           <li><Link href="#" onClick={() => setOpen(false)}>Sobre</Link></li>
           <li><Link href="#" onClick={() => setOpen(false)}>Serviços</Link></li>
-          <li><Link href="#" onClick={() => setOpen(false)}>Galeria</Link></li>
           <li><Link href="#" onClick={() => setOpen(false)}>Localização</Link></li>
+          <li><Link href="#" onClick={() => setOpen(false)}>FAQ</Link></li>
           <li><Link href="#" onClick={() => setOpen(false)}>Contato</Link></li>
         </ul>
       )}
