@@ -26,21 +26,21 @@ const Menu = () => {
 
       {/* MENU DESKTOP (sempre visível em telas médias/grandes) */}
       <ul className="hidden md:flex md:gap-2 lg:gap-6 xl:text-2xl uppercase text-white font-semibold">
-        <li><Link href="#">Sobre</Link></li>
-        <li><Link href="#">Serviços</Link></li>
-        <li><Link href="#">Localização</Link></li>
-        <li><Link href="#">FAQ</Link></li>
-        <li><Link href="#">Contato</Link></li>
+        <li><Link href="/#sobre">Sobre</Link></li>
+        <li><Link href="/#servicos">Serviços</Link></li>
+        <li><Link href="/#localizacao">Localização</Link></li>
+        <li><Link href="/#faq">FAQ</Link></li>
+        <li><Link href="/#contato">Contato</Link></li>
       </ul>
 
       {/* MENU MOBILE (abre e fecha com o hambúrguer) */}
       {open && (
         <ul className="absolute top-[70px] right-0 bg-black w-full flex flex-col gap-6 py-6 px-6 uppercase text-white font-semibold md:hidden shadow-lg">
-          <li><Link href="#" onClick={() => setOpen(false)}>Sobre</Link></li>
-          <li><Link href="#" onClick={() => setOpen(false)}>Serviços</Link></li>
-          <li><Link href="#" onClick={() => setOpen(false)}>Localização</Link></li>
-          <li><Link href="#" onClick={() => setOpen(false)}>FAQ</Link></li>
-          <li><Link href="#" onClick={() => setOpen(false)}>Contato</Link></li>
+          <li><Link href="/#sobre" onClick={() => setOpen(false)}>Sobre</Link></li>
+          <li><Link href="/#servicos" onClick={() => setOpen(false)}>Serviços</Link></li>
+          <li><Link href="/#localizacao" onClick={() => setOpen(false)}>Localização</Link></li>
+          <li><Link href="/#faq" onClick={() => setOpen(false)}>FAQ</Link></li>
+          <li><Link href="/#contato" onClick={() => setOpen(false)}>Contato</Link></li>
         </ul>
       )}
     </nav>

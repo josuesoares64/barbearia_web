@@ -1,6 +1,6 @@
 const PerguntasFrequentes = () => {
     return (
-        <section className="p-4 w-full bg-black">
+        <section id="faq" className="p-4 w-full bg-black">
             <div className="max-w-2xl mx-auto">
             <h3 className="text-3xl font-bold mb-6 text-white text-center " >Perguntas Frequentes</h3>
             <details className="mb-4 rounded-lg bg-white shadow-md overflow-hidden faq-details">
@@ -21,7 +21,8 @@ const PerguntasFrequentes = () => {
             </details>
             <details className="mb-4 rounded-lg bg-white shadow-md overflow-hidden faq-details">
                 <summary className="p-4 font-semibold text-lg text-gray-900 border-b border-gray-100">Posso comprar produtos (pomadas, óleos, shampoos) usados no salão?</summary>
-                <p className="p-4 pt-4 text-gray-600">Sim, todos os produtos profissionais utilizados pelo seu barbeiro (pomadas, óleos, etc.) estão disponíveis para venda em nossa recepção. Seu barbeiro pode indicar os melhores para sua manutenção em casa.</p>
+                <p className="p-4 pt-4 text-gray-600 ">Sim, todos os produtos profissionais utilizados pelo seu barbeiro (pomadas, óleos, etc.) estão disponíveis para venda em nossa recepção. Seu barbeiro pode indicar os melhores para sua manutenção em casa.</p>
+                
             </details>
             </div>
         </section>

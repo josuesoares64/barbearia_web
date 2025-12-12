@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const Sobre = () => {
   return (
-    <section className="px-6 py-20 bg-black text-white">
+    <section id="sobre" className="px-6 py-20 bg-black text-white">
       <h2 className="font-bold text-3xl text-center mb-10">Sobre</h2>
 
       <div className="md:flex items-center gap-10 max-w-6xl mx-auto">
