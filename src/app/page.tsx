@@ -1,3 +1,11 @@
+import Hero from "./components/sections/Hero";
+import Sobre from "./components/sections/Sobre";
+
 export default function Home() {
-  return <h1 className="text-green-900 text-center">teste</h1>;
+  return (
+    <main>
+      <Hero />
+      <Sobre />
+    </main>
+  );
 }
