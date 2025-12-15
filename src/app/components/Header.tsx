@@ -19,7 +19,7 @@ const Header = () => {
           <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-gray-200 to-white translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
 
           <span className="relative text-white group-hover:text-black transition-colors duration-300">
-            <Link href="#">Agendar</Link>
+            <Link href="/agendamento">Agendar</Link>
           </span>
         </button>
       </div>
