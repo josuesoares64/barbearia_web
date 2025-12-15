@@ -9,12 +9,39 @@ import StepTime from "@/app/components/booking/StepTime";
 import StepClient from "@/app/components/booking/StepClient";
 import StepSummary from "@/app/components/booking/StepSummary";
 
-export default function AgendamentoPage() {
-  // Controla em qual passo o usuário está
-  const [step, setStep] = useState(1);
+/* =======================
+   TIPOS (IMPORTANTES)
+======================= */
+type Service = {
+  id: number;
+  name: string;
+  duration: number;
+};
 
-  // Guarda TODOS os dados do agendamento
-  const [booking, setBooking] = useState({
+type Professional = {
+  id: number;
+  name: string;
+};
+
+type Booking = {
+  date: string;
+  service: string;
+  professional: string;
+  time: string;
+  name: string;
+  phone: string;
+};
+
+export default function AgendamentoPage() {
+  /* =======================
+     CONTROLE DE PASSO
+  ======================= */
+  const [step, setStep] = useState<number>(1);
+
+  /* =======================
+     ESTADO DO AGENDAMENTO
+  ======================= */
+  const [booking, setBooking] = useState<Booking>({
     date: "",
     service: "",
     professional: "",
@@ -23,23 +50,37 @@ export default function AgendamentoPage() {
     phone: "",
   });
 
-  // Dados que virão do backend futuramente
-  const [services, setServices] = useState([]);
-  const [professionals, setProfessionals] = useState([]);
+  /* =======================
+     DADOS (VIRÃO DO BACK)
+  ======================= */
+  const [services, setServices] = useState<Service[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
 
-  // Horários disponíveis (por enquanto fixos)
-  const availableTimes = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
+  /* =======================
+     HORÁRIOS DISPONÍVEIS
+     (depois virão do back)
+  ======================= */
+  const availableTimes: string[] = [
+    "09:00",
+    "10:00",
+    "11:00",
+    "13:00",
+    "14:00",
+    "15:00",
+  ];
 
-  // Simula chamada ao backend
+  /* =======================
+     SIMULA BACKEND
+  ======================= */
   useEffect(() => {
     function loadData() {
-      const servicesData = [
+      const servicesData: Service[] = [
         { id: 1, name: "Corte", duration: 30 },
         { id: 2, name: "Barba", duration: 20 },
         { id: 3, name: "Corte + Barba", duration: 50 },
       ];
 
-      const professionalsData = [
+      const professionalsData: Professional[] = [
         { id: 1, name: "João" },
         { id: 2, name: "Carlos" },
         { id: 3, name: "Marcos" },
@@ -70,6 +111,7 @@ export default function AgendamentoPage() {
           booking={booking}
           setBooking={setBooking}
           onNext={() => setStep(3)}
+          onBack={() => setStep(1)}
         />
       )}
 
@@ -80,6 +122,7 @@ export default function AgendamentoPage() {
           booking={booking}
           setBooking={setBooking}
           onNext={() => setStep(4)}
+          onBack={() => setStep(2)}
         />
       )}
 
@@ -90,6 +133,7 @@ export default function AgendamentoPage() {
           booking={booking}
           setBooking={setBooking}
           onNext={() => setStep(5)}
+          onBack={() => setStep(3)}
         />
       )}
 
@@ -113,11 +157,6 @@ export default function AgendamentoPage() {
           }}
         />
       )}
-
-      {/* DEBUG - VISUALIZAR DADOS
-      <pre className="mt-8 bg-gray-100 p-3 text-xs rounded">
-        {JSON.stringify(booking, null, 2)}
-      </pre> */}
     </main>
   );
 }

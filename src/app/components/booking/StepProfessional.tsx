@@ -3,11 +3,13 @@ type Professional = {
   name: string;
 };
 
+type Booking = {
+  professional: string;
+};
+
 type StepProfessionalProps = {
   professionals: Professional[];
-  booking: {
-    professional: string;
-  };
+  booking: Booking;
   setBooking: React.Dispatch<React.SetStateAction<any>>;
   onNext: () => void;
   onBack: () => void;
@@ -20,40 +22,46 @@ const StepProfessional = ({
   onNext,
   onBack,
 }: StepProfessionalProps) => {
+  function handleSelectProfessional(name: string) {
+    setBooking((prev: any) => ({
+      ...prev,
+      professional: name,
+    }));
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h2 className="text-xl font-bold">Escolha o profissional</h2>
 
       <div className="grid gap-3">
-        {professionals.map((pro) => (
+        {professionals.map((professional) => (
           <button
-            key={pro.id}
-            onClick={() =>
-              setBooking((prev) => ({
-                ...prev,
-                professional: pro.name,
-              }))
-            }
-            className={`p-4 border rounded-md text-left ${
-              booking.professional === pro.name
-                ? "border-black bg-gray-100"
-                : "border-gray-300"
-            }`}
+            key={professional.id}
+            onClick={() => handleSelectProfessional(professional.name)}
+            className={`p-4 border rounded-md text-left transition
+              ${
+                booking.professional === professional.name
+                  ? "border-black bg-gray-100"
+                  : "border-gray-300"
+              }`}
           >
-            {pro.name}
+            {professional.name}
           </button>
         ))}
       </div>
 
-      <div className="flex justify-between">
-        <button onClick={onBack} className="border px-4 py-2 rounded-md">
+      <div className="flex gap-3 pt-4">
+        <button
+          onClick={onBack}
+          className="w-1/2 border border-black py-2 rounded-md"
+        >
           Voltar
         </button>
 
         <button
-          onClick={onNext}
           disabled={!booking.professional}
-          className="bg-black text-white px-4 py-2 rounded-md disabled:opacity-50"
+          onClick={onNext}
+          className="w-1/2 bg-black text-white py-2 rounded-md disabled:opacity-50"
         >
           Continuar
         </button>

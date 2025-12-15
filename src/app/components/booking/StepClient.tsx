@@ -1,9 +1,17 @@
+import React from "react";
+
+type Booking = {
+  date: string;
+  service: string;
+  professional: string;
+  time: string;
+  name: string;
+  phone: string;
+};
+
 type StepClientProps = {
-  booking: {
-    name: string;
-    phone: string;
-  };
-  setBooking: React.Dispatch<React.SetStateAction<any>>;
+  booking: Booking;
+  setBooking: React.Dispatch<React.SetStateAction<Booking>>;
   onBack: () => void;
   onFinish: () => void;
 };
@@ -14,59 +22,54 @@ const StepClient = ({
   onBack,
   onFinish,
 }: StepClientProps) => {
-  // Atualiza o nome conforme o usuário digita
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setBooking((prev) => ({
+    setBooking((prev: Booking) => ({
       ...prev,
       name: e.target.value,
     }));
   }
 
-  // Atualiza o telefone conforme o usuário digita
   function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setBooking((prev) => ({
+    setBooking((prev: Booking) => ({
       ...prev,
       phone: e.target.value,
     }));
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h2 className="text-xl font-bold">Seus dados</h2>
 
-      {/* Campo Nome */}
       <input
         type="text"
         placeholder="Seu nome"
         value={booking.name}
         onChange={handleNameChange}
-        className="w-full border p-2 rounded-md"
+        className="w-full border p-3 rounded-md"
       />
 
-      {/* Campo Telefone */}
       <input
         type="tel"
         placeholder="Telefone / WhatsApp"
         value={booking.phone}
         onChange={handlePhoneChange}
-        className="w-full border p-2 rounded-md"
+        className="w-full border p-3 rounded-md"
       />
 
-      {/* Botões */}
-      <div className="flex justify-between gap-4">
+      <div className="flex gap-3 pt-4">
         <button
           onClick={onBack}
-          className="w-1/2 border px-4 py-2 rounded-md"
+          className="w-1/2 border border-black py-2 rounded-md"
         >
           Voltar
         </button>
 
         <button
-          onClick={onFinish}
           disabled={!booking.name || !booking.phone}
-          className="w-1/2 bg-black text-white px-4 py-2 rounded-md disabled:opacity-50"
+          onClick={onFinish}
+          className="w-1/2 bg-black text-white py-2 rounded-md disabled:opacity-50"
         >
-          Finalizar agendamento
+          Finalizar
         </button>
       </div>
     </div>

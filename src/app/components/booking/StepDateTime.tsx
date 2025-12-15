@@ -1,14 +1,21 @@
+"use client";
+
+import React from "react";
+import { Booking } from "@/app/types/Booking";
+
 type StepDateTimeProps = {
-  booking: {
-    date: string;
-  };
-  setBooking: React.Dispatch<React.SetStateAction<any>>;
+  booking: Booking;
+  setBooking: React.Dispatch<React.SetStateAction<Booking>>;
   onNext: () => void;
 };
 
-const StepDateTime = ({ booking, setBooking, onNext }: StepDateTimeProps) => {
+const StepDateTime = ({
+  booking,
+  setBooking,
+  onNext,
+}: StepDateTimeProps) => {
   function handleDateChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setBooking((prev) => ({
+    setBooking((prev: Booking) => ({
       ...prev,
       date: e.target.value,
     }));
@@ -22,7 +29,7 @@ const StepDateTime = ({ booking, setBooking, onNext }: StepDateTimeProps) => {
         type="date"
         value={booking.date}
         onChange={handleDateChange}
-        className="w-full border p-2 rounded-md"
+        className="w-full border p-3 rounded-md"
       />
 
       <button
@@ -30,7 +37,7 @@ const StepDateTime = ({ booking, setBooking, onNext }: StepDateTimeProps) => {
         onClick={onNext}
         className="w-full bg-black text-white py-2 rounded-md disabled:opacity-50"
       >
-        Continuar
+        Próximo
       </button>
     </div>
   );
