@@ -42,7 +42,7 @@ const StepClient = ({
 
       <input
         type="text"
-        placeholder="Seu nome"
+        placeholder="Seu nome e Sobrenome"
         value={booking.name}
         onChange={handleNameChange}
         className="w-full border p-3 rounded-md"
