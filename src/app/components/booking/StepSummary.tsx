@@ -9,10 +9,14 @@ const StepSummary = ({ booking, onBack, onConfirm }: any) => {
       <div className="space-y-2 text-sm">
         <p><strong>Data:</strong> {booking.date}</p>
         <p><strong>Horário:</strong> {booking.time}</p>
-        {/* Se o nome não aparece aqui, é porque o StepService não salvou 'service_name' */}
         <p><strong>Serviço:</strong> {booking.service_name || "Não selecionado"}</p>
         <p><strong>Profissional:</strong> {booking.barber_name || "Não selecionado"}</p>
-        <p><strong>Cliente:</strong> {booking.name}</p>
+        
+        {/* CORREÇÃO AQUI: Unindo o nome e sobrenome para exibir */}
+        <p>
+          <strong>Cliente:</strong> {`${booking.first_name || ""} ${booking.last_name || ""}`.trim() || "Não informado"}
+        </p>
+        
         <p><strong>Telefone:</strong> {booking.phone}</p>
       </div>
 
@@ -22,7 +26,7 @@ const StepSummary = ({ booking, onBack, onConfirm }: any) => {
         </button>
         <button
           onClick={onConfirm}
-          className="w-1/2 bg-black text-white py-2 rounded-md font-bold hover:bg-green-700"
+          className="w-1/2 bg-black text-white py-2 rounded-md font-bold hover:bg-green-700 transition-colors"
         >
           Confirmar
         </button>
