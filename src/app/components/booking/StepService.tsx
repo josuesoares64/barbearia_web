@@ -1,77 +1,34 @@
-type Service = {
-  id: number;
-  name: string;
-  duration: number;
-};
+"use client";
+import React from "react";
 
-type Booking = {
-  service: string;
-};
-
-type StepServiceProps = {
-  services: Service[];
-  booking: Booking;
-  setBooking: React.Dispatch<React.SetStateAction<any>>;
-  onNext: () => void;
-  onBack: () => void;
-};
-
-const StepService = ({
-  services,
-  booking,
-  setBooking,
-  onNext,
-  onBack,
-}: StepServiceProps) => {
-  function handleSelectService(serviceName: string) {
-    setBooking((prev: any) => ({
-      ...prev,
-      service: serviceName,
-    }));
-  }
-
+export default function StepService({ services, booking, setBooking, onNext, onBack }: any) {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Escolha o serviço</h2>
-
       <div className="grid gap-3">
-        {services.map((service) => (
-          <button
-            key={service.id}
-            onClick={() => handleSelectService(service.name)}
-            className={`p-4 border rounded-md text-left transition
-              ${
-                booking.service === service.name
-                  ? "border-black bg-gray-100"
-                  : "border-gray-300"
-              }`}
-          >
-            <p className="font-semibold">{service.name}</p>
-            <p className="text-sm text-gray-500">
-              Duração: {service.duration} minutos
-            </p>
-          </button>
-        ))}
+        {services.map((s: any) => {
+          const isSelected = booking.service_id === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setBooking((prev: any) => ({
+                ...prev,
+                service_id: s.id,
+                service_name: s.name
+              }))}
+              className={`p-4 border rounded-md text-left transition ${isSelected ? "border-black bg-gray-100" : "border-gray-300"}`}
+            >
+              <p className="font-semibold">{s.name}</p>
+              <p className="text-sm text-gray-500">Duração: {s.duration_minutes || s.duration} min</p>
+            </button>
+          );
+        })}
       </div>
-
       <div className="flex gap-3 pt-4">
-        <button
-          onClick={onBack}
-          className="w-1/2 border border-black py-2 rounded-md"
-        >
-          Voltar
-        </button>
-
-        <button
-          disabled={!booking.service}
-          onClick={onNext}
-          className="w-1/2 bg-black text-white py-2 rounded-md disabled:opacity-50"
-        >
-          Continuar
-        </button>
+        <button onClick={onBack} className="w-1/2 border border-black py-2 rounded-md">Voltar</button>
+        <button disabled={!booking.service_id} onClick={onNext} className="w-1/2 bg-black text-white py-2 rounded-md disabled:opacity-50">Continuar</button>
       </div>
     </div>
   );
-};
-
-export default StepService;
+}

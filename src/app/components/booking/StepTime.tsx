@@ -1,8 +1,10 @@
+"use client";
+
+import React from "react";
+
 type StepTimeProps = {
-  times: string[];
-  booking: {
-    time: string;
-  };
+  times: string[]; // Horários que vieram da API (AvailabilityController)
+  booking: any;
   setBooking: React.Dispatch<React.SetStateAction<any>>;
   onNext: () => void;
   onBack: () => void;
@@ -18,30 +20,35 @@ const StepTime = ({
   function handleSelectTime(time: string) {
     setBooking((prev: any) => ({
       ...prev,
-      time,
+      time: time,
     }));
   }
 
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Escolha o horário</h2>
-
-      <div className="grid grid-cols-3 gap-3">
-        {times.map((time) => (
-          <button
-            key={time}
-            onClick={() => handleSelectTime(time)}
-            className={`p-3 border rounded-md transition
-              ${
+      
+      {times.length > 0 ? (
+        <div className="grid grid-cols-3 gap-3">
+          {times.map((time) => (
+            <button
+              key={time}
+              onClick={() => handleSelectTime(time)}
+              className={`p-3 border rounded-md text-center transition ${
                 booking.time === time
-                  ? "border-black bg-gray-100"
-                  : "border-gray-300"
+                  ? "border-black bg-black text-white"
+                  : "border-gray-300 hover:border-black"
               }`}
-          >
-            {time}
-          </button>
-        ))}
-      </div>
+            >
+              {time}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="text-red-500 text-sm">
+          Não há horários disponíveis para este profissional nesta data.
+        </p>
+      )}
 
       <div className="flex gap-3 pt-4">
         <button
