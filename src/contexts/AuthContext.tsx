@@ -9,6 +9,7 @@ interface User {
   id: string;
   email: string;
   role: string;
+  slug: string;
 }
 
 interface AuthContextType {
@@ -31,7 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedUser = Cookies.get("barber.user");
 
     if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error("Erro ao carregar usuário salvo");
+      }
     }
     setLoading(false);
   }, []);
@@ -48,23 +53,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!response.ok) throw new Error(data.message || "Erro no login");
 
+      // 1. Decodifica o Token que o Backend gerou (com o novo campo 'slug')
       const token = data.accessToken; 
       const decoded: any = jwtDecode(token);
 
-      const userData = {
+      // 2. Captura o slug dinâmico (prioriza o que vem no JSON, fallback para o Token)
+      const slugDaBarbearia = data.slug || decoded.slug; 
+
+      if (!slugDaBarbearia) {
+        throw new Error("Erro: Unidade não identificada para este usuário.");
+      }
+
+      const userData: User = {
         id: decoded.id,
         email: decoded.email,
-        role: decoded.role.toLowerCase(),
+        // Garante que 'Dono' ou 'Barbeiro' vire 'dono' ou 'barbeiro'
+        role: (decoded.role || "").toLowerCase(),
+        slug: slugDaBarbearia
       };
 
+      // 3. Persistência nos Cookies
       Cookies.set("barber.token", token, { expires: 7 });
       Cookies.set("barber.user", JSON.stringify(userData), { expires: 7 });
 
       setUser(userData);
 
-      // Defina o slug da sua barbearia aqui para o redirecionamento funcionar
-      const meuSlug = "barbearia-do-josue"; 
-      router.push(`/${meuSlug}/dashboard`); 
+      // 4. Redirecionamento Dinâmico para a barbearia correta do banco
+      router.push(`/${slugDaBarbearia}/dashboard`); 
       
     } catch (error: any) {
       alert(error.message);
