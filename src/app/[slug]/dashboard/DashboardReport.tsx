@@ -12,23 +12,18 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
   const [clientes, setClientes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. ESTADO PARA USUÁRIO LOGADO E FILTROS
   const [user, setUser] = useState<{ role: string; id: string } | null>(null);
   const hoje = new Date().toLocaleDateString('en-CA'); 
   const [dataInicio, setDataInicio] = useState(hoje);
   const [dataFim, setDataFim] = useState(hoje);
   const [barbeiroId, setBarbeiroId] = useState("todos");
 
-  // 2. EXTRAÇÃO DE PERMISSÕES (NORMALIZANDO MAIÚSCULAS/MINÚSCULAS)
   useEffect(() => {
     if (token) {
       try {
         const decoded: any = jwtDecode(token);
-        const roleNormalizado = decoded.role?.toLowerCase(); // "Dono" vira "dono"
-        
+        const roleNormalizado = decoded.role?.toLowerCase();
         setUser({ role: roleNormalizado, id: decoded.id });
-        
-        // Se não for dono, trava o filtro no ID do barbeiro logado
         if (roleNormalizado !== "dono") {
           setBarbeiroId(decoded.id);
         }
@@ -40,7 +35,6 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
 
   const isDono = user?.role === "dono";
 
-  // 3. CARREGAR DADOS BÁSICOS (BARBEIROS, SERVIÇOS, CLIENTES)
   useEffect(() => {
     async function loadBasics() {
       if (!slug || slug === "undefined") return;
@@ -50,7 +44,6 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
           fetch(`http://localhost:3000/barbershops/${slug}/services`, { headers: { Authorization: `Bearer ${token}` } }),
           fetch(`http://localhost:3000/barbershops/${slug}/clients`, { headers: { Authorization: `Bearer ${token}` } })
         ]);
-        
         setBarbeiros(await resB.json());
         setServicos(await resS.json());
         setClientes(await resC.json());
@@ -61,14 +54,11 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
     loadBasics();
   }, [slug, token]);
 
-  // 4. BUSCA DE DADOS (FATURAMENTO E AGENDA)
   const fetchData = useCallback(async () => {
     if (!slug || slug === "undefined" || !user) return;
     try {
       setLoading(true);
-
       let barbeiroQuery = "";
-      // Prioriza o ID do usuário se ele não for dono
       const idParaUrl = isDono ? barbeiroId : user.id;
 
       if (idParaUrl !== "todos") {
@@ -90,7 +80,6 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
 
       setReportData(await resFat.json());
       setAgendamentosBrutos(await resAg.json());
-
     } catch (err) {
       console.error("Erro ao carregar relatório:", err);
     } finally {
@@ -98,12 +87,10 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
     }
   }, [slug, token, dataInicio, dataFim, barbeiroId, barbeiros, isDono, user]);
 
-  // Dispara a busca sempre que o filtro ou o usuário mudar
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // 5. AÇÕES DA TABELA
   const handleFinalizar = async (id: string) => {
     try {
       const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/${id}`, {
@@ -115,18 +102,18 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
     } catch (err) { console.error(err); }
   };
 
-  const handleExcluir = async (id: string) => {
-    if (!confirm("Deseja excluir este agendamento?")) return;
+  const handleNoShow = async (id: string) => {
+    if (!confirm("Confirmar que o cliente não compareceu?")) return;
     try {
-      await fetch(`http://localhost:3000/barbershops/${slug}/appointment/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: 'no_show' })
       });
-      fetchData();
+      if (res.ok) fetchData();
     } catch (err) { console.error(err); }
   };
 
-  // 6. FORMATAÇÃO E FILTRO DA LISTA (FRONTEND)
   const agendamentosFormatados = (Array.isArray(agendamentosBrutos) ? agendamentosBrutos : [])
     .filter((ag: any) => {
       const isScheduled = ag.status === "scheduled";
@@ -139,7 +126,6 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
       const servicoObj = servicos.find(s => s.id === ag.service_id);
       const barbeiroObj = barbeiros.find(b => b.id === ag.barber_id);
       const clienteObj = clientes.find(c => c.id === ag.client_id);
-      
       return {
         ...ag,
         data: ag.appointment_date,
@@ -153,7 +139,6 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
 
   return (
     <div className="flex flex-col gap-6">
-      {/* SEÇÃO DE FILTROS */}
       <div className="bg-zinc-900/40 p-5 rounded-xl border border-zinc-800 flex flex-col md:flex-row items-end gap-4">
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
           <div className="flex flex-col gap-1.5">
@@ -182,15 +167,15 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
         </button>
       </div>
 
-      {/* CARDS DE FATURAMENTO (SOMENTE PARA DONO) */}
       {isDono && (
         <StatCards 
           faturamento={reportData?.faturamento_total || "0.00"} 
-          qtdServicos={reportData?.quantidade_servicos || 0} 
+          qtdServicos={reportData?.resumo?.concluidos || 0}
+          qtdCancelados={reportData?.resumo?.cancelados || 0}
+          qtdNoShow={reportData?.resumo?.faltas || 0}
         />
       )}
 
-      {/* TABELA DE ATENDIMENTOS */}
       <section>
         <h3 className="text-white font-bold mb-4 uppercase text-[10px] tracking-widest">
           {isDono ? "Agenda da Unidade" : "Minha Agenda"} ({agendamentosFormatados.length})
@@ -202,7 +187,7 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
           <AppointmentTable 
             agendamentos={agendamentosFormatados} 
             onFinalizar={handleFinalizar} 
-            onExcluir={handleExcluir} 
+            onExcluir={handleNoShow} 
           />
         )}
       </section>

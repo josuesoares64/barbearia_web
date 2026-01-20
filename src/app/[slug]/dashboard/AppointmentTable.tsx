@@ -73,7 +73,7 @@ export function AppointmentTable({ agendamentos, onFinalizar, onExcluir }: Table
                         onClick={() => onExcluir(ag.id)}
                         className="bg-red-500/10 text-red-500 border border-red-500/20 text-[9px] font-black px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-all uppercase"
                       >
-                        Excluir
+                        Faltou
                       </button>
                     </div>
                   </td>
