@@ -46,16 +46,25 @@ function AgendamentoContent() {
   });
 
   // 1. Carregar Profissionais (Já carrega no início para o Passo 2)
-  useEffect(() => {
-    async function loadProfessionals() {
-      if (!slug) return;
-      try {
-        const res = await fetch(`http://localhost:3000/barbershops/${slug}/barbers`);
-        setProfessionals(await res.json());
-      } catch (err) { console.error("Erro profissionais:", err); }
+  // 1. Carregar Profissionais
+useEffect(() => {
+  async function loadProfessionals() {
+    if (!slug) return;
+    try {
+      const res = await fetch(`http://localhost:3000/barbershops/${slug}/barbers`);
+      const data = await res.json();
+      
+      // 👇 FILTRO ADICIONADO AQUI
+      // Só coloca no estado quem não tem is_active === false
+      const activeProfessionals = data.filter((p: any) => p.is_active !== false);
+      
+      setProfessionals(activeProfessionals);
+    } catch (err) { 
+      console.error("Erro profissionais:", err); 
     }
-    loadProfessionals();
-  }, [slug]);
+  }
+  loadProfessionals();
+}, [slug]);
 
   // 2. Buscar Horários Disponíveis (Dispara quando completa Passo 1, 2 e 3)
   useEffect(() => {
