@@ -7,6 +7,7 @@ interface Appointment {
   servico: string;
   valor: string;
   cliente: string;
+  phone?: string; // Adicionado para suportar o número
   barbeiro: string;
 }
 
@@ -43,7 +44,7 @@ export function AppointmentTable({ agendamentos, onFinalizar, onExcluir }: Table
                     <div className="flex flex-col">
                       <span className="text-zinc-400 text-xs">{ag.data}</span>
                       <span className="font-mono text-amber-500 font-bold text-sm">
-                        {ag.horario.substring(0, 5)} {/* Remove os segundos do 00:00:00 */}
+                        {ag.horario.substring(0, 5)}
                       </span>
                     </div>
                   </td>
@@ -54,13 +55,23 @@ export function AppointmentTable({ agendamentos, onFinalizar, onExcluir }: Table
                     </div>
                   </td>
                   <td className="p-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm text-zinc-300">Cliente: {ag.cliente}</span>
-                      <span className="text-[9px] text-zinc-500 uppercase tracking-tighter">
-                        Profional: {ag.barbeiro}
-                      </span>
-                    </div>
-                  </td>
+  <div className="flex flex-col">
+    <span className="text-sm text-zinc-300 font-medium">
+      Cliente: {ag.cliente}
+    </span>
+    
+    {/* Exibição do Telefone */}
+    {ag.phone && (
+      <span className="text-[11px] text-amber-500/90 font-mono mt-0.5">
+        Telefone:{ag.phone}
+      </span>
+    )}
+
+    <span className="text-[9px] text-zinc-500 uppercase tracking-tighter mt-1">
+      Profissional: {ag.barbeiro}
+    </span>
+  </div>
+</td>
                   <td className="p-4">
                     <div className="flex justify-center items-center gap-3">
                       <button

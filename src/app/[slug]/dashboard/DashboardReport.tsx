@@ -115,27 +115,21 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
   };
 
   const agendamentosFormatados = (Array.isArray(agendamentosBrutos) ? agendamentosBrutos : [])
-    .filter((ag: any) => {
-      const isScheduled = ag.status === "scheduled";
-      const idParaFiltro = isDono ? barbeiroId : user?.id;
-      const matchesBarber = idParaFiltro === "todos" || ag.barber_id === idParaFiltro;
-      const matchesDate = ag.appointment_date >= dataInicio && ag.appointment_date <= dataFim;
-      return isScheduled && matchesBarber && matchesDate;
-    })
-    .map((ag: any) => {
-      const servicoObj = servicos.find(s => s.id === ag.service_id);
-      const barbeiroObj = barbeiros.find(b => b.id === ag.barber_id);
-      const clienteObj = clientes.find(c => c.id === ag.client_id);
-      return {
-        ...ag,
-        data: ag.appointment_date,
-        horario: ag.appointment_time,
-        servico: servicoObj?.name || "Serviço",
-        valor: servicoObj?.price || "0,00",
-        barbeiro: barbeiroObj?.username || "Profissional",
-        cliente: clienteObj ? `${clienteObj.first_name} ${clienteObj.last_name || ""}` : "Cliente Particular"
-      };
-    });
+  .filter((ag: any) => {
+    const idParaFiltro = isDono ? barbeiroId : user?.id;
+
+    // filtro por barbeiro continua existindo
+    const matchesBarber =
+      idParaFiltro === "todos" ||
+      ag.barbeiro === barbeiros.find(b => b.id === idParaFiltro)?.username;
+
+    // filtro de data usando os campos reais da rota
+    const matchesDate =
+      ag.data >= dataInicio && ag.data <= dataFim;
+
+    return matchesBarber && matchesDate;
+  });
+
 
   return (
     <div className="flex flex-col gap-6">
