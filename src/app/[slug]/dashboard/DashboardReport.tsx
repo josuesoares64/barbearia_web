@@ -2,14 +2,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { AppointmentTable } from "./AppointmentTable";
 import { StatCards } from "./StatCards";
+import { OccupancyMetrics } from "./OccupancyBars";
 import { jwtDecode } from "jwt-decode";
 
 export function DashboardReport({ slug, token }: { slug: string; token: string }) {
   const [reportData, setReportData] = useState<any>(null);
+  const [occupancyData, setOccupancyData] = useState<any>(null);
   const [agendamentosBrutos, setAgendamentosBrutos] = useState([]);
   const [barbeiros, setBarbeiros] = useState<any[]>([]);
-  const [servicos, setServicos] = useState<any[]>([]);
-  const [clientes, setClientes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [user, setUser] = useState<{ role: string; id: string } | null>(null);
@@ -24,34 +24,24 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
         const decoded: any = jwtDecode(token);
         const roleNormalizado = decoded.role?.toLowerCase();
         setUser({ role: roleNormalizado, id: decoded.id });
-        if (roleNormalizado !== "dono") {
-          setBarbeiroId(decoded.id);
-        }
-      } catch (e) {
-        console.error("Erro ao decodificar token");
-      }
+        if (roleNormalizado !== "dono") setBarbeiroId(decoded.id);
+      } catch (e) { console.error("Erro token"); }
     }
   }, [token]);
 
   const isDono = user?.role === "dono";
 
   useEffect(() => {
-    async function loadBasics() {
+    async function loadBarbers() {
       if (!slug || slug === "undefined") return;
       try {
-        const [resB, resS, resC] = await Promise.all([
-          fetch(`http://localhost:3000/barbershops/${slug}/barbers`, { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`http://localhost:3000/barbershops/${slug}/services`, { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`http://localhost:3000/barbershops/${slug}/clients`, { headers: { Authorization: `Bearer ${token}` } })
-        ]);
+        const resB = await fetch(`http://localhost:3000/barbershops/${slug}/barbers`, { 
+          headers: { Authorization: `Bearer ${token}` } 
+        });
         setBarbeiros(await resB.json());
-        setServicos(await resS.json());
-        setClientes(await resC.json());
-      } catch (err) {
-        console.error("Erro ao carregar dados básicos:", err);
-      }
+      } catch (err) { console.error(err); }
     }
-    loadBasics();
+    loadBarbers();
   }, [slug, token]);
 
   const fetchData = useCallback(async () => {
@@ -64,22 +54,25 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
       if (idParaUrl !== "todos") {
         const selecionado = barbeiros.find(b => b.id === idParaUrl);
         if (selecionado) {
-          const usernameUrl = selecionado.username.replace(/\s+/g, '-');
-          barbeiroQuery = `&barbeiro=${usernameUrl}`;
+          barbeiroQuery = `&barbeiro=${selecionado.username.replace(/\s+/g, '-')}`;
         }
       }
 
-      const [resFat, resAg] = await Promise.all([
+      const [resFat, resAg, resOcup] = await Promise.all([
         fetch(`http://localhost:3000/barbershops/${slug}/appointment/dashboard/faturamento?inicio=${dataInicio}&fim=${dataFim}${barbeiroQuery}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
         fetch(`http://localhost:3000/barbershops/${slug}/appointment?inicio=${dataInicio}&fim=${dataFim}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`http://localhost:3000/barbershops/${slug}/appointment/dashboard/ocupacao?inicio=${dataInicio}&fim=${dataFim}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
 
       setReportData(await resFat.json());
       setAgendamentosBrutos(await resAg.json());
+      setOccupancyData(await resOcup.json());
     } catch (err) {
       console.error("Erro ao carregar relatório:", err);
     } finally {
@@ -87,70 +80,64 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
     }
   }, [slug, token, dataInicio, dataFim, barbeiroId, barbeiros, isDono, user]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
+  // FUNÇÕES DOS BOTÕES (RESTAURADAS)
   const handleFinalizar = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/${id}`, {
-        method: 'PUT',
+      const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/${id}/status`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status: 'completed' })
       });
-      if (res.ok) fetchData(); 
+      if (res.ok) {
+        setAgendamentosBrutos((prev: any[]) => prev.map((ag: any) => ag.id === id ? { ...ag, status: 'completed' } : ag));
+        fetchData(); // Recarrega faturamento e ocupação
+      }
     } catch (err) { console.error(err); }
   };
 
   const handleNoShow = async (id: string) => {
     if (!confirm("Confirmar que o cliente não compareceu?")) return;
     try {
-      const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/${id}`, {
-        method: 'PUT',
+      const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/${id}/status`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status: 'no_show' })
       });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        setAgendamentosBrutos((prev: any[]) => prev.map((ag: any) => ag.id === id ? { ...ag, status: 'no_show' } : ag));
+        fetchData(); // Recarrega faturamento e ocupação
+      }
     } catch (err) { console.error(err); }
   };
 
   const agendamentosFormatados = (Array.isArray(agendamentosBrutos) ? agendamentosBrutos : [])
   .filter((ag: any) => {
     const idParaFiltro = isDono ? barbeiroId : user?.id;
-
-    // filtro por barbeiro continua existindo
-    const matchesBarber =
-      idParaFiltro === "todos" ||
-      ag.barbeiro === barbeiros.find(b => b.id === idParaFiltro)?.username;
-
-    // filtro de data usando os campos reais da rota
-    const matchesDate =
-      ag.data >= dataInicio && ag.data <= dataFim;
-
-    return matchesBarber && matchesDate;
+    const matchesBarber = idParaFiltro === "todos" || ag.barbeiro === barbeiros.find(b => b.id === idParaFiltro)?.username;
+    const matchesDate = ag.data >= dataInicio && ag.data <= dataFim;
+    const status = ag.status?.toLowerCase();
+    const isPending = status === 'scheduled' || status === 'pending' || !status;
+    return matchesBarber && matchesDate && isPending;
   });
-
 
   return (
     <div className="flex flex-col gap-6">
+      {/* FILTROS */}
       <div className="bg-zinc-900/40 p-5 rounded-xl border border-zinc-800 flex flex-col md:flex-row items-end gap-4">
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 text-white">
             <label className="text-zinc-500 text-[10px] uppercase font-bold">Início</label>
-            <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="bg-black border border-zinc-800 rounded p-2 text-white text-sm outline-none" />
+            <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="bg-black border border-zinc-800 rounded p-2 outline-none text-sm" />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 text-white">
             <label className="text-zinc-500 text-[10px] uppercase font-bold">Fim</label>
-            <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="bg-black border border-zinc-800 rounded p-2 text-white text-sm outline-none" />
+            <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="bg-black border border-zinc-800 rounded p-2 outline-none text-sm" />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 text-white">
             <label className="text-zinc-500 text-[10px] uppercase font-bold">Barbeiro</label>
-            <select 
-              value={isDono ? barbeiroId : user?.id} 
-              onChange={(e) => setBarbeiroId(e.target.value)} 
-              disabled={!isDono}
-              className={`bg-black border border-zinc-800 rounded p-2 text-white text-sm outline-none ${!isDono && 'opacity-50 cursor-not-allowed'}`}
-            >
+            <select value={isDono ? barbeiroId : user?.id} onChange={(e) => setBarbeiroId(e.target.value)} disabled={!isDono} className="bg-black border border-zinc-800 rounded p-2 text-sm outline-none disabled:opacity-50">
               {isDono && <option value="todos">Todos os Profissionais</option>}
               {barbeiros.map((b: any) => <option key={b.id} value={b.id}>{b.username}</option>)}
             </select>
@@ -160,6 +147,10 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
           Aplicar Filtros
         </button>
       </div>
+
+      {isDono && occupancyData && (
+        <OccupancyMetrics data={occupancyData} />
+      )}
 
       {isDono && (
         <StatCards 
@@ -172,9 +163,8 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
 
       <section>
         <h3 className="text-white font-bold mb-4 uppercase text-[10px] tracking-widest">
-          {isDono ? "Agenda da Unidade" : "Minha Agenda"} ({agendamentosFormatados.length})
+           Agenda ({agendamentosFormatados.length})
         </h3>
-        
         {loading ? (
           <p className="text-zinc-600 animate-pulse text-xs italic uppercase">Sincronizando...</p>
         ) : (
