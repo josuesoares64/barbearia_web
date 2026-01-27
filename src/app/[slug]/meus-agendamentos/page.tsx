@@ -28,32 +28,37 @@ export default function MeusAgendamentos() {
 
   // FUNÇÃO PARA CANCELAR (SIM/NÃO)
   const handleCancel = async (appointmentId: string) => {
-    const confirmar = confirm("Deseja realmente cancelar este agendamento? Esta ação não pode ser desfeita.");
-    
-    if (confirmar) {
-      try {
-        const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/cancel/client`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            id: appointmentId, 
-            telefone: phone // Enviando o telefone como o seu controller espera
-          }),
-        });
+  const confirmar = confirm("Deseja realmente cancelar este agendamento?");
+  
+  if (confirmar) {
+    try {
+      // 1. Log para conferir o que está sendo enviado
+      console.log("Enviando cancelamento para o telefone:", phone);
 
-        if (res.ok) {
-          alert("Agendamento removido com sucesso!");
-          // Remove da lista na tela para o usuário ver que sumiu
-          setAppointments(appointments.filter((app: any) => app.id !== appointmentId));
-        } else {
-          const error = await res.json();
-          alert(error.error || "Erro ao cancelar.");
-        }
-      } catch (err) {
-        alert("Erro de conexão com o servidor.");
+      const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/cancel/client`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          telefone: phone // PRECISA ser 'telefone' para bater com seu Controller
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Agendamento cancelado com sucesso!");
+        // Remove da lista visual para o cliente ver o feedback imediato
+        setAppointments((prev) => prev.filter((app: any) => app.id !== appointmentId));
+      } else {
+        // Se cair aqui, o erro provavelmente é "Cliente não encontrado" ou "Nenhum agendamento"
+        alert(data.error || "Erro ao cancelar.");
       }
+    } catch (err) {
+      console.error("Erro de conexão:", err);
+      alert("Erro de conexão com o servidor.");
     }
-  };
+  }
+};
 
   // FUNÇÃO PARA EDITAR (REDIRECIONA PARA OS STEPS)
   const handleEdit = (app: any) => {
