@@ -2,6 +2,7 @@ import { DashboardWelcome } from "./DashboardWelcome";
 import { DashboardReport } from "./DashboardReport";
 import { ServiceManager } from "./ServiceManager";
 import { cookies } from "next/headers";
+import { HoursManager } from "./HoursManager";
 
 export default async function DashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   // 1. Resolve o slug
@@ -18,6 +19,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ slug
         
         {/* Ambos precisam das props para funcionar */}
         <ServiceManager slug={slug} token={token} />
+
+        <HoursManager slug={slug} token={token} />
         
         {/* ADICIONE AS PROPS AQUI: */}
         <DashboardReport slug={slug} token={token} />

@@ -17,12 +17,10 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   
-  // Estados para a aba de atribuição
   const [selectedBarber, setSelectedBarber] = useState<string>("");
   const [assigningService, setAssigningService] = useState<string | null>(null);
   const [unassigningId, setUnassigningId] = useState<string | null>(null);
 
-  // Estados para criação de barbeiro
   const [isCreatingBarber, setIsCreatingBarber] = useState(false);
   const [barberFormData, setBarberFormData] = useState({
     username: "",
@@ -34,7 +32,6 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   const [togglingBarberId, setTogglingBarberId] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
 
-  // ESTADOS PARA BLOQUEIOS (FOLGAS)
   const [blockedTimes, setBlockedTimes] = useState<any[]>([]);
   const [blockFormData, setBlockFormData] = useState({
     barber_id: "",
@@ -67,7 +64,6 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
     }
   }, [selectedBarber, activeTab]);
 
-  // --- FUNÇÕES DE SERVIÇOS (ORIGINAL) ---
   const fetchServices = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/services`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -123,16 +119,16 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
     setIsEditing(false);
   };
 
-  // --- FUNÇÕES DE EQUIPE (ORIGINAL CORRIGIDA) ---
   const fetchBarbersAndOwners = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setBarbers(data.filter((u: any) => u.role.toLowerCase() === "barbeiro" || u.role.toLowerCase() === "dono"));
-    }
-  };
+  // Adicionei o ?include_inactive=true no final da URL
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers?include_inactive=true`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (response.ok) {
+    const data = await response.json();
+    setBarbers(data.filter((u: any) => u.role.toLowerCase() === "barbeiro" || u.role.toLowerCase() === "dono"));
+  }
+};
 
   const handleCreateBarber = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,6 +143,25 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
       fetchBarbersAndOwners();
     }
     setIsCreatingBarber(false);
+  };
+
+  const handleToggleBarberStatus = async (barberId: string, currentStatus: boolean) => {
+    if (!confirm(`Deseja realmente ${currentStatus ? "demitir" : "reativar"} este profissional?`)) return;
+    setTogglingBarberId(barberId);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${barberId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ is_active: !currentStatus }),
+      });
+      if (response.ok) {
+        setBarbers(prev => prev.map(b => b.id === barberId ? { ...b, is_active: !currentStatus } : b));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setTogglingBarberId(null);
+    }
   };
 
   const fetchBarberServices = async (id: string) => {
@@ -176,7 +191,6 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
     setUnassigningId(null);
   };
 
-  // --- FUNÇÕES DE FOLGAS ---
   const fetchBlockedTimes = async () => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -217,7 +231,6 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
             <button onClick={() => setActiveTab("offtimes")} className={`flex-1 py-2 text-xs font-bold uppercase transition-all ${activeTab === "offtimes" ? "text-amber-500 border-b-2 border-amber-500" : "text-zinc-500"}`}>Folgas</button>
           </div>
 
-          {/* ABA SERVIÇOS */}
           {activeTab === "services" && (
             <>
               <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
@@ -240,7 +253,6 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
             </>
           )}
 
-          {/* ABA EQUIPE */}
           {activeTab === "assignments" && (
             <div className="space-y-6">
               <form onSubmit={handleCreateBarber} className="bg-zinc-800/20 p-4 rounded border border-zinc-800 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -252,7 +264,15 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
               <div className="space-y-2">
                 {barbers.map(b => (
                   <div key={b.id} className={`p-3 rounded border ${selectedBarber === b.id ? 'border-amber-500 bg-amber-500/5' : 'border-zinc-800 bg-black/40'}`}>
-                    <div className="flex justify-between items-center"><span className="text-white text-xs font-bold uppercase">{b.username}</span><button onClick={() => setSelectedBarber(b.id)} className="text-amber-500 text-[10px] font-bold uppercase">Selecionar</button></div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-white text-xs font-bold uppercase">{b.username} {!b.is_active && <span className="text-red-500 text-[8px]">(Inativo)</span>}</span>
+                      <div className="flex gap-4">
+                        <button onClick={() => handleToggleBarberStatus(b.id, b.is_active)} className="text-zinc-500 text-[10px] font-bold uppercase hover:text-red-500">
+                          {togglingBarberId === b.id ? "..." : (b.is_active ? "Demitir" : "Reativar")}
+                        </button>
+                        <button onClick={() => setSelectedBarber(b.id)} className="text-amber-500 text-[10px] font-bold uppercase">Selecionar</button>
+                      </div>
+                    </div>
                     {selectedBarber === b.id && (
                       <div className="mt-4 pt-4 border-t border-zinc-800 grid md:grid-cols-2 gap-4">
                         <div><h5 className="text-amber-500 text-[9px] font-bold uppercase mb-2">Serviços Atuais</h5>
@@ -273,7 +293,6 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
             </div>
           )}
 
-          {/* ABA FOLGAS */}
           {activeTab === "offtimes" && (
             <div className="space-y-4">
               <form onSubmit={handleBlockTime} className="bg-zinc-800/30 p-4 rounded-lg border border-zinc-700 grid gap-3">
@@ -312,6 +331,6 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
 }
 
 interface Service { id: string; name: string; price: string; duration_minutes: number; }
-interface Barber { id: string; username: string; email: string; role: string; }
+interface Barber { id: string; username: string; email: string; role: string; is_active: boolean; }
 interface BarberService { id: string; barber_id: string; service_id: string; }
 type TabType = "services" | "assignments" | "offtimes";
