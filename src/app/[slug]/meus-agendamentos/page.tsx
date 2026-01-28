@@ -26,106 +26,109 @@ export default function MeusAgendamentos() {
     }
   };
 
-  // FUNÇÃO PARA CANCELAR (SIM/NÃO)
   const handleCancel = async (appointmentId: string) => {
-  const confirmar = confirm("Deseja realmente cancelar este agendamento?");
-  
-  if (confirmar) {
-    try {
-      // 1. Log para conferir o que está sendo enviado
-      console.log("Enviando cancelamento para o telefone:", phone);
+    const confirmar = confirm("Deseja realmente cancelar este agendamento?");
+    if (confirmar) {
+      try {
+        const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/cancel/client`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ telefone: phone }),
+        });
 
-      const res = await fetch(`http://localhost:3000/barbershops/${slug}/appointment/cancel/client`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          telefone: phone // PRECISA ser 'telefone' para bater com seu Controller
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Agendamento cancelado com sucesso!");
-        // Remove da lista visual para o cliente ver o feedback imediato
-        setAppointments((prev) => prev.filter((app: any) => app.id !== appointmentId));
-      } else {
-        // Se cair aqui, o erro provavelmente é "Cliente não encontrado" ou "Nenhum agendamento"
-        alert(data.error || "Erro ao cancelar.");
+        if (res.ok) {
+          alert("Agendamento cancelado com sucesso!");
+          setAppointments((prev) => prev.filter((app: any) => app.id !== appointmentId));
+        } else {
+          const data = await res.json();
+          alert(data.error || "Erro ao cancelar.");
+        }
+      } catch (err) {
+        alert("Erro de conexão com o servidor.");
       }
-    } catch (err) {
-      console.error("Erro de conexão:", err);
-      alert("Erro de conexão com o servidor.");
     }
-  }
-};
+  };
 
-  // FUNÇÃO PARA EDITAR (REDIRECIONA PARA OS STEPS)
   const handleEdit = (app: any) => {
-    // Aqui você pode redirecionar para a home passando os dados via query params
-    // ou salvar no localStorage para o AgendamentoPage recuperar
-    router.push(`/${slug}/agendamento?edit=${app.id}`);
+    // MAPEAMENTO EXATO: Pegamos o que vem do banco e jogamos no formato do seu state 'booking'
+    const bookingToEdit = {
+      isEditing: true,
+      appointment_id: app.id,
+      barber_id: app.barber_id,
+      barber_name: app.Barber?.name,
+      service_id: app.service_id,
+      service_name: app.Service?.name,
+      date: app.appointment_date, // Formato YYYY-MM-DD que o input date usa
+      time: app.appointment_time.slice(0, 5),
+      first_name: app.Client?.first_name,
+      last_name: app.Client?.last_name,
+      phone: phone,
+    };
+
+    // Salvamos no LocalStorage
+    localStorage.setItem("edit_booking", JSON.stringify(bookingToEdit));
+    
+    // Redireciona para a página onde estão os Steps
+    router.push(`/${slug}/agendamento`);
   };
 
   return (
-    <main className="max-w-xl mx-auto pt-24 p-4 min-h-screen bg-gray-50">
-      <button onClick={() => router.back()} className="text-sm text-gray-500 mb-6 hover:text-black">
-        ← Voltar
-      </button>
+    <main className="min-h-screen bg-black text-zinc-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-3xl bg-zinc-950 border border-zinc-900 p-6 md:p-12 shadow-2xl relative">
+        <div className="absolute top-0 left-0 w-full h-1 bg-amber-500" />
+        
+        <button onClick={() => router.back()} className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-8 hover:text-amber-500 italic flex items-center gap-2">
+          ← Voltar
+        </button>
 
-      <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
-        <h1 className="text-2xl font-bold mb-4">Meus Agendamentos</h1>
-        <div className="flex gap-2">
+        <header className="mb-10">
+          <span className="text-[10px] uppercase font-black tracking-[0.4em] text-amber-500/80 mb-2 italic block">Control Panel</span>
+          <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter text-white">
+            Meus <span className="text-amber-500">Agendamentos</span>
+          </h1>
+        </header>
+
+        <div className="bg-black border border-zinc-900 p-2 mb-10 flex flex-col md:flex-row gap-2">
           <input
             type="text"
-            placeholder="Seu telefone"
-            className="flex-1 border p-3 rounded-xl outline-none focus:ring-2 focus:ring-black"
+            placeholder="Telefone de busca"
+            className="flex-1 bg-transparent p-4 font-mono font-bold text-amber-500 outline-none placeholder:text-zinc-800"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
-          <button onClick={handleSearch} className="bg-black text-white px-6 rounded-xl font-bold">
+          <button onClick={handleSearch} className="bg-amber-500 text-black px-10 py-4 font-black uppercase italic text-xs hover:bg-white transition-all">
             {loading ? "..." : "Buscar"}
           </button>
         </div>
-      </div>
 
-      <div className="space-y-4">
-        {appointments.map((app: any) => (
-          <div key={app.id} className="bg-white border p-5 rounded-2xl shadow-sm border-l-4 border-l-black">
-            <div className="flex justify-between mb-4">
-              <div>
-                <h3 className="font-bold text-lg">{app.Service?.name}</h3>
-                <p className="text-sm text-gray-600">
-                  {new Date(app.appointment_date).toLocaleDateString('pt-BR')} às {app.appointment_time.slice(0, 5)}
-                </p>
-                <p className="text-xs text-gray-400">Cliente: {app.Client?.first_name} {app.Client?.last_name}</p>
+        <div className="space-y-4">
+          {appointments.map((app: any) => (
+            <div key={app.id} className="bg-black border border-zinc-900 p-6 hover:border-amber-500/30 transition-all group">
+              <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+                <div>
+                  <h3 className="font-black text-xl text-white uppercase italic tracking-tighter">{app.Service?.name}</h3>
+                  <p className="text-sm font-mono text-amber-500 mt-1">
+                    {new Date(app.appointment_date).toLocaleDateString('pt-BR')} às {app.appointment_time.slice(0, 5)}
+                  </p>
+                </div>
+                <div className="text-right">
+                   <span className="text-[9px] font-black px-3 py-1 uppercase tracking-widest border border-amber-500/20 text-amber-500">
+                    {app.status}
+                  </span>
+                </div>
               </div>
-              <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded h-fit uppercase">
-                {app.status}
-              </span>
-            </div>
 
-            {/* BOTÕES LADO A LADO */}
-            <div className="flex gap-2">
-              <button 
-                onClick={() => handleEdit(app)}
-                className="flex-1 py-2.5 bg-gray-100 text-gray-800 text-xs font-bold rounded-xl hover:bg-gray-200 transition-all"
-              >
-                EDITAR
-              </button>
-              <button 
-                onClick={() => handleCancel(app.id)}
-                className="flex-1 py-2.5 border border-red-100 text-red-500 text-xs font-bold rounded-xl hover:bg-red-50 transition-all"
-              >
-                CANCELAR
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button onClick={() => handleEdit(app)} className="flex-1 py-4 bg-zinc-900 text-zinc-400 text-[9px] font-black uppercase tracking-[0.3em] hover:bg-white hover:text-black italic border border-zinc-800">
+                  Editar
+                </button>
+                <button onClick={() => handleCancel(app.id)} className="flex-1 py-4 border border-zinc-900 text-zinc-700 text-[9px] font-black uppercase tracking-[0.3em] hover:text-red-500 hover:border-red-500/20 italic">
+                  Cancelar
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-        
-        {searched && appointments.length === 0 && (
-          <p className="text-center text-gray-500">Nenhum agendamento encontrado.</p>
-        )}
+          ))}
+        </div>
       </div>
     </main>
   );

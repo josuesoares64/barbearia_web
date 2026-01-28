@@ -1,121 +1,96 @@
+"use client";
+import { useEffect, useState } from "react";
+
 interface ServicoProps {
-    id: number;
-    nome: string;
-    tag_destaque: string;
-    descricao_curta: string;
-    duracao_minutos: number;
-    preco: number;
-    link: string;
+    id: string;
+    name: string;
+    duration_minutes: number;
+    price: number;
 }
 
-const servicos: ServicoProps[] = [
-    {
-        "id": 1,
-        "nome": "O Ritual da Barba Clássica",
-        "tag_destaque": "Experiência Premium",
-        "descricao_curta": "Barbear com navalha, toalhas quentes e frias, e massagem facial. Precisão e relaxamento garantidos.",
-        "duracao_minutos": 50,
-        "preco": 65.00,
-        "link": "#agendamento"
-    },
-    {
-        "id": 2,
-        "nome": "Fade (Degradê) Master",
-        "tag_destaque": "Técnica Avançada",
-        "descricao_curta": "Corte moderno focado na transição perfeita do volume. Inclui lavagem e estilização final.",
-        "duracao_minutos": 45,
-        "preco": 55.00,
-        "link": "#agendamento"
-    },
-    {
-        "id": 3,
-        "nome": "Corte e Estilização Executiva",
-        "tag_destaque": "Visual Profissional",
-        "descricao_curta": "Corte personalizado à máquina e tesoura, adaptado ao seu rosto. Inclui lavagem com massagem e consultoria de produtos.",
-        "duracao_minutos": 60,
-        "preco": 70.00,
-        "link": "#agendamento"
-    },
-    {
-        "id": 4,
-        "nome": "Combo 'O Cavalheiro Completo'",
-        "tag_destaque": "Mais Vendido!",
-        "descricao_curta": "A união perfeita: Corte Executivo + Modelagem de Barba com navalha. Economize tempo e garanta um visual harmonioso.",
-        "duracao_minutos": 90,
-        "preco": 110.00,
-        "link": "#agendamento"
-    },
-    {
-        "id": 5,
-        "nome": "Tratamento Revigorante da Pele",
-        "tag_destaque": "Cuidado Facial",
-        "descricao_curta": "Limpeza profunda com esfoliação e máscara facial detox (carvão/argila) para reduzir oleosidade e impurezas.",
-        "duracao_minutos": 20,
-        "preco": 35.00,
-        "link": "#agendamento"
-    },
-    {
-        "id": 6,
-        "nome": "Disfarce de Grisalhos Express",
-        "tag_destaque": "Rejuvenescimento Sutil",
-        "descricao_curta": "Tonalização semi-permanente discreta e rápida para disfarçar fios brancos de forma natural, sem tingimento completo.",
-        "duracao_minutos": 30,
-        "preco": 40.00,
-        "link": "#agendamento"
-    }
-];
-
-
-const CardServico = ({ servico }: { servico: ServicoProps }) => {
-    const precoFormatado = servico.preco.toLocaleString('pt-BR', {
+const CardServico = ({ servico, slug }: { servico: ServicoProps, slug: string }) => {
+    const precoFormatado = Number(servico.price).toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL',
     });
 
     return (
         <a 
-            href={servico.link} 
-            className="block group transition-transform duration-300 hover:scale-[1.03] hover:shadow-xl 
-                       bg-white rounded-xl shadow-lg overflow-hidden p-6 h-full 
-                       flex flex-col justify-between border-t-4 border-amber-600 hover:border-gray-900"
+            href={`/${slug}/agendamento`} 
+            className="group relative block bg-zinc-950 border border-zinc-900 p-8 transition-all duration-500 hover:border-amber-500/50"
         >
-            
-            <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 bg-amber-100 px-3 py-1 rounded-full inline-block mb-2">
-                    {servico.tag_destaque}
-                </span>
+            {/* Detalhe estético no canto do card */}
+            <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-transparent group-hover:border-amber-500 transition-all duration-500"></div>
 
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{servico.nome}</h3>
+            <div className="relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-4 block">
+                    Serviço Profissional
+                </span>
                 
-                <p className="text-gray-600 text-sm mb-4">{servico.descricao_curta}</p>
+                <h3 className="text-2xl font-bold text-white uppercase italic tracking-tighter mb-2 group-hover:text-amber-500 transition-colors">
+                    {servico.name}
+                </h3>
+                
+                <p className="text-zinc-500 text-sm mb-6 leading-relaxed font-light">
+                    Qualidade e precisão garantida para o seu estilo único.
+                </p>
             </div>
             
-            <div className="flex justify-between items-end pt-4 border-t border-gray-100 mt-4">
-                
+            <div className="flex justify-between items-end pt-6 border-t border-zinc-900 mt-4 relative z-10">
                 <div>
-                    <p className="text-gray-500 text-xs">Duração Média:</p>
-                    <p className="font-semibold text-sm text-gray-700">{servico.duracao_minutos} min</p>
+                    <p className="text-zinc-600 text-[10px] uppercase font-bold tracking-widest mb-1">Duração</p>
+                    <div className="flex items-center gap-2 text-zinc-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span className="font-semibold text-sm">{servico.duration_minutes} min</span>
+                    </div>
                 </div>
                 
                 <div className="text-right">
-                    <p className="text-sm font-light text-gray-500">Valor:</p>
-                    <p className="text-3xl font-extrabold text-amber-700 hover:text-gray-900">{precoFormatado}</p>
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Investimento</p>
+                    <p className="text-3xl font-black text-white group-hover:text-amber-500 transition-colors tracking-tighter">
+                        {precoFormatado}
+                    </p>
                 </div>
             </div>
+
+            {/* Efeito de preenchimento no hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </a>
     );
 };
 
-const Servicos = () => {
+const Servicos = ({ slug }: { slug: string }) => {
+    const [listaServicos, setListaServicos] = useState<ServicoProps[]>([]);
+
+    useEffect(() => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/services`)
+            .then(res => res.json())
+            .then(data => setListaServicos(data))
+            .catch(err => console.error("Erro ao carregar serviços", err));
+    }, [slug]);
 
     return (
-        <section id="servicos" className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-            <h2 className="text-4xl font-bold mb-12 text-gray-800">Nossos Serviços</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full">
-                {servicos.map((servico) => (
-                    <CardServico key={servico.id} servico={servico} /> 
-                ))}
+        <section id="servicos" className="py-24 bg-black px-6">
+            <div className="max-w-6xl mx-auto flex flex-col items-center">
+                
+                {/* Cabeçalho da Seção */}
+                <div className="flex flex-col items-center mb-16">
+                    <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter text-center">
+                        Nossos Serviços
+                    </h2>
+                    <div className="w-16 h-1 bg-amber-500 mt-4"></div>
+                </div>
+                
+                {/* Grid de Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                    {listaServicos.length > 0 ? (
+                        listaServicos.map((servico) => (
+                            <CardServico key={servico.id} servico={servico} slug={slug} /> 
+                        ))
+                    ) : (
+                        <p className="text-zinc-500 text-center col-span-full">Carregando serviços...</p>
+                    )}
+                </div>
             </div>
         </section>
     );

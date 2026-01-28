@@ -1,27 +1,54 @@
-import Image from "next/image";
+"use client";
 import Link from "next/link";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import Menu from "./menu";
+import { FiLogOut } from "react-icons/fi";
 
-const Header = () => {
+const Header = ({ shop }: { shop?: any }) => {
+  const params = useParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const slug = params?.slug as string;
+
+  const isDashboard = pathname.includes("/dashboard");
+  const displayName = shop?.name || "Barbearia";
+  
+  const handleLogout = () => {
+    router.push("/login");
+  };
+
   return (
-    <header className="fixed top-0 left-0 w-full h-[70px] bg-black text-white flex items-center justify-between sm:px-6 px-2 z-50 shadow-md">
-      {/* ESQUERDA */}
-      <div className="flex items-center gap-3">
-        <Image src="/logo.png" alt="Logo da Barbearia" width={40} height={40} />
-        <h1 className="text-lg text-white font-bold">Barbearia</h1>
+    <header className="fixed top-0 left-0 w-full h-[70px] bg-black/95 backdrop-blur-md text-white flex items-center justify-between px-4 sm:px-8 z-[100] border-b border-zinc-900">
+      
+      {/* NOME À ESQUERDA */}
+      <div className="flex items-center min-w-0 flex-1">
+        <Link href={slug ? `/${slug}` : "/"} className="truncate">
+          <h1 className="text-sm sm:text-xl text-white font-black uppercase tracking-tighter italic truncate group-hover:text-amber-500 transition-colors">
+            {displayName}
+          </h1>
+        </Link>
       </div>
 
-      {/* DIREITA */}
-      <div className="flex items-center gap-3">
-        <Menu />
+      {/* AÇÕES À DIREITA */}
+      <div className="flex items-center gap-3 sm:gap-6 ml-4">
+        {!isDashboard ? (
+          <Link 
+            href={`/${slug}/agendamento`} 
+            className="whitespace-nowrap px-4 py-2 bg-amber-500 text-black font-black rounded-sm uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+          >
+            Agendar
+          </Link>
+        ) : (
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3 py-2 font-black text-red-500 border border-red-500/30 text-[10px] uppercase"
+          >
+            <FiLogOut size={16} />
+          </button>
+        )}
 
-        <button className="relative px-5 py-2 overflow-hidden font-semibold text-white rounded-md border border-white group">
-          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-gray-200 to-white translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-
-          <span className="relative text-white group-hover:text-black transition-colors duration-300">
-            <Link href="/agendamento">Agendar</Link>
-          </span>
-        </button>
+        {/* COMPONENTE DE MENU */}
+        {!isDashboard && <Menu slug={slug} />}
       </div>
     </header>
   );
