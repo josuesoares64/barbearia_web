@@ -80,7 +80,7 @@ export default function StepService({ booking, setBooking, onNext, onBack, slug 
                       {s.name}
                     </span>
                     <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-600 mt-1">
-                      Tempo estimado: {s.duration || '30'} min
+                      Tempo estimado: {s.duration_minutes || '30'} min
                     </span>
                   </div>
                   
