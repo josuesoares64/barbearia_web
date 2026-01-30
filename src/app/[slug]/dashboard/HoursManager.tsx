@@ -17,6 +17,21 @@ export function HoursManager({ slug, token }: { slug: string; token: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hours, setHours] = useState<HourSlot[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // ADIÇÃO: Estado para controle de acesso
+  const [isOwner, setIsOwner] = useState(false);
+
+  // ADIÇÃO: Verificação do papel do usuário no token
+  useEffect(() => {
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setIsOwner(payload.role?.toLowerCase() === "dono");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [token]);
 
   // Form para novo horário
   const [formData, setFormData] = useState({
@@ -31,7 +46,6 @@ export function HoursManager({ slug, token }: { slug: string; token: string }) {
     });
     if (response.ok) {
       const data = await response.json();
-      // Ordenar por dia da semana e depois por hora de abertura
       setHours(data.sort((a: any, b: any) => a.weekday - b.weekday || a.open_time.localeCompare(b.open_time)));
     }
   };
@@ -68,6 +82,9 @@ export function HoursManager({ slug, token }: { slug: string; token: string }) {
     });
     fetchHours();
   };
+
+  // ADIÇÃO: Trava de segurança (não renderiza nada se não for dono)
+  if (!isOwner) return null;
 
   return (
     <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4 mt-4">

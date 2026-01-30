@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 export function PageManager({ slug, token }: { slug: string; token: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isOwner, setIsOwner] = useState(false); // Adicionado para controle
   const [formData, setFormData] = useState({
     hero_title: "",
     hero_subtitle: "",
@@ -15,6 +16,18 @@ export function PageManager({ slug, token }: { slug: string; token: string }) {
     email_contato: "", // Sincronizado com o banco
     google_maps_link: ""
   });
+
+  // Verificação de permissão (Dono)
+  useEffect(() => {
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setIsOwner(payload.role?.toLowerCase() === "dono");
+      } catch (e) {
+        console.error("Erro ao validar permissão", e);
+      }
+    }
+  }, [token]);
 
   const fetchData = async () => {
     try {
@@ -68,6 +81,9 @@ export function PageManager({ slug, token }: { slug: string; token: string }) {
     }
   };
 
+  // Trava de segurança: Se não for dono, o componente não renderiza nada
+  if (!isOwner) return null;
+
   return (
     <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4 mt-4">
       <div className="flex items-center justify-between">
@@ -103,7 +119,7 @@ export function PageManager({ slug, token }: { slug: string; token: string }) {
             <textarea rows={4} value={formData.about_text} onChange={e => setFormData({...formData, about_text: e.target.value})} className="w-full bg-black border border-zinc-800 p-3 text-xs text-white rounded-lg resize-none outline-none focus:border-amber-500" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-[9px] text-zinc-400 uppercase font-black">Link da Foto de Capa (URL)</label>
               <input type="text" value={formData.banner_url} onChange={e => setFormData({...formData, banner_url: e.target.value})} className="w-full bg-black border border-zinc-800 p-3 text-xs text-white rounded-lg outline-none focus:border-amber-500" />
@@ -112,7 +128,7 @@ export function PageManager({ slug, token }: { slug: string; token: string }) {
               <label className="text-[9px] text-zinc-400 uppercase font-black">Link da Logo (URL)</label>
               <input type="text" value={formData.logo_url} onChange={e => setFormData({...formData, logo_url: e.target.value})} className="w-full bg-black border border-zinc-800 p-3 text-xs text-white rounded-lg outline-none focus:border-amber-500" placeholder="https://imgur.com/logo.png" />
             </div>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">

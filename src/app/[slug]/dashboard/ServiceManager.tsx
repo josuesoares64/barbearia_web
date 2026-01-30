@@ -33,6 +33,7 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   const [isOwner, setIsOwner] = useState(false);
 
   const [blockedTimes, setBlockedTimes] = useState<any[]>([]);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [blockFormData, setBlockFormData] = useState({
     barber_id: "",
     date: "",
@@ -120,15 +121,14 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   };
 
   const fetchBarbersAndOwners = async () => {
-  // Adicionei o ?include_inactive=true no final da URL
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers?include_inactive=true`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (response.ok) {
-    const data = await response.json();
-    setBarbers(data.filter((u: any) => u.role.toLowerCase() === "barbeiro" || u.role.toLowerCase() === "dono"));
-  }
-};
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers?include_inactive=true`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setBarbers(data.filter((u: any) => u.role.toLowerCase() === "barbeiro" || u.role.toLowerCase() === "dono"));
+    }
+  };
 
   const handleCreateBarber = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,23 +192,75 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   };
 
   const fetchBlockedTimes = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) setBlockedTimes(await res.json());
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) setBlockedTimes(await res.json());
+    } catch (error) {
+      console.error("Erro ao carregar bloqueios:", error);
+    }
   };
 
   const handleBlockTime = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    const payload = { date: blockFormData.date, start_time: blockFormData.is_full_day ? "00:00" : blockFormData.start_time, end_time: blockFormData.is_full_day ? "23:59" : blockFormData.end_time };
-    if (blockFormData.barber_id === "ALL") {
-      await Promise.all(barbers.map(b => fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${b.id}/blocked-times`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })));
-    } else {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${blockFormData.barber_id}/blocked-times`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
+    if (!blockFormData.date || !blockFormData.barber_id) {
+      alert("Preencha barbeiro e data");
+      return;
     }
-    fetchBlockedTimes();
-    setLoading(false);
+
+    setLoading(true);
+    const payload = {
+      date: blockFormData.date,
+      start_time: blockFormData.is_full_day ? "00:00" : blockFormData.start_time,
+      end_time: blockFormData.is_full_day ? "23:59" : blockFormData.end_time,
+      is_full_day: blockFormData.is_full_day
+    };
+
+    try {
+      if (editingBlockId) {
+        // EDIÇÃO
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times/${editingBlockId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify(payload),
+        });
+      } else if (blockFormData.barber_id === "ALL") {
+        // CRIAÇÃO COLETIVA
+        await Promise.all(
+          barbers.map(b =>
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${b.id}/blocked-times`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+              body: JSON.stringify(payload),
+            })
+          )
+        );
+      } else {
+        // CRIAÇÃO INDIVIDUAL
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${blockFormData.barber_id}/blocked-times`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(errorData.error || "Erro ao criar bloqueio.");
+        }
+      }
+
+      setBlockFormData({ barber_id: "", date: "", start_time: "08:00", end_time: "19:00", is_full_day: true });
+      setEditingBlockId(null);
+      fetchBlockedTimes();
+    } catch (error) {
+      console.error("Erro no bloqueio:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOwner) return null;
@@ -296,7 +348,7 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
           {activeTab === "offtimes" && (
             <div className="space-y-4">
               <form onSubmit={handleBlockTime} className="bg-zinc-800/30 p-4 rounded-lg border border-zinc-700 grid gap-3">
-                <select className="bg-black border border-zinc-700 p-2 text-xs text-white" value={blockFormData.barber_id} onChange={e => setBlockFormData({...blockFormData, barber_id: e.target.value})} required>
+                <select className="bg-black border border-zinc-700 p-2 text-xs text-white" value={blockFormData.barber_id} onChange={e => setBlockFormData({...blockFormData, barber_id: e.target.value})} required disabled={!!editingBlockId}>
                   <option value="">Selecione o Prestador...</option>
                   <option value="ALL" className="text-amber-500 font-bold">🚩 TODA A EQUIPE (FERIADO)</option>
                   {barbers.map(b => <option key={b.id} value={b.id}>{b.username}</option>)}
@@ -309,18 +361,62 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
                     <input type="time" value={blockFormData.end_time} onChange={e => setBlockFormData({...blockFormData, end_time: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white" />
                   </div>
                 )}
-                <button type="submit" className="bg-amber-500 text-black text-[10px] font-black py-2.5 rounded uppercase">Bloquear Agenda</button>
+                <div className="flex gap-2">
+                  <button type="submit" disabled={loading} className="flex-1 bg-amber-500 text-black text-[10px] font-black py-2.5 rounded uppercase">{loading ? "Processando..." : (editingBlockId ? "Salvar Alteração" : "Bloquear Agenda")}</button>
+                  {editingBlockId && (
+                    <button type="button" onClick={() => { setEditingBlockId(null); setBlockFormData({ barber_id: "", date: "", start_time: "08:00", end_time: "19:00", is_full_day: true }); }} className="bg-zinc-700 text-white text-[10px] font-black px-4 rounded uppercase">Cancelar</button>
+                  )}
+                </div>
               </form>
               <div className="space-y-2">
                 {blockedTimes.map(block => (
-                  <div key={block.id} className="bg-black/40 border border-zinc-800 p-3 rounded flex justify-between items-center text-[10px]">
-                    <span className="text-zinc-300">{block.date} | {block.start_time.slice(0,5)}h - {block.end_time.slice(0,5)}h</span>
-                    <button onClick={async () => {
-                      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times/${block.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-                      fetchBlockedTimes();
-                    }} className="text-red-500 font-bold uppercase">Remover</button>
-                  </div>
-                ))}
+  <div key={block.id} className={`bg-black/40 border border-zinc-800 p-3 rounded flex justify-between items-center text-[10px] ${block.isPast ? 'opacity-40 grayscale' : ''}`}>
+    <span className="text-zinc-300">
+      <strong className="text-amber-500 mr-2">
+        {barbers.find(b => b.id === block.barber_id)?.username || "Equipe"}:
+      </strong>
+      {block.date} | {block.start_time.slice(0, 5)}h - {block.end_time.slice(0, 5)}h
+    </span>
+
+    <div className="flex gap-3">
+      {block.isPast ? (
+        <span className="text-zinc-500 font-black uppercase">Finalizado</span>
+      ) : (
+        <>
+          <button 
+            onClick={() => {
+              setEditingBlockId(block.id);
+              setBlockFormData({
+                barber_id: block.barber_id,
+                date: block.date,
+                start_time: block.start_time.slice(0, 5),
+                end_time: block.end_time.slice(0, 5),
+                is_full_day: block.start_time.slice(0, 5) === "00:00" && block.end_time.slice(0, 5) === "23:59"
+              });
+            }} 
+            className="text-amber-500 font-bold uppercase"
+          >
+            Editar
+          </button>
+          
+          <button 
+            onClick={async () => {
+              if(!confirm("Remover bloqueio?")) return;
+              await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times/${block.id}`, { 
+                method: 'DELETE', 
+                headers: { Authorization: `Bearer ${token}` } 
+              });
+              fetchBlockedTimes();
+            }} 
+            className="text-red-500 font-bold uppercase"
+          >
+            Remover
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+))}
               </div>
             </div>
           )}
