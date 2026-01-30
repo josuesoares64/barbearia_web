@@ -2,18 +2,24 @@
 import { useAuth } from "@/contexts/AuthContext";
 
 export function DashboardWelcome() {
-  const { user } = useAuth();
+  // CORREÇÃO: Forçamos o tipo para 'any' para o TypeScript aceitar o .username
+  const { user } = useAuth() as { user: any }; 
   
-  // Lógica para extrair apenas o primeiro nome, limpando pontos do e-mail se necessário
   const obterPrimeiroNome = () => {
+    // 1. Tenta pegar o nome real (Josué Soares -> Josué)
     if (user?.username) {
-      return user.username.split(' ')[0]; // Retorna 'Josué' do 'Josué Soares'
+      return user.username.split(' ')[0];
     }
     
+    // 2. Tenta o nome vindo do Google/Provider se existir
+    if (user?.name) {
+      return user.name.split(' ')[0];
+    }
+
+    // 3. Fallback para o email (josue.soares@... -> josue)
     if (user?.email) {
-      // Pega o que vem antes do @ e depois separa por ponto, caso seja 'josue.soares'
       const parteEmail = user.email.split('@')[0];
-      return parteEmail.split('.')[0]; // Retorna 'josue' do 'josue.soares'
+      return parteEmail.split('.')[0].charAt(0).toUpperCase() + parteEmail.split('.')[0].slice(1);
     }
     
     return 'Barbeiro';

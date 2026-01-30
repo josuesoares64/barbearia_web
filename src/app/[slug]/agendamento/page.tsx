@@ -20,6 +20,7 @@ export type Booking = {
   first_name: string;
   last_name: string;
   phone: string;
+  name: string;
 };
 
 function AgendamentoContent() {
@@ -38,6 +39,7 @@ function AgendamentoContent() {
     time: "",
     first_name: "",
     last_name: "",
+    name: "",
     phone: "",
   });
 
@@ -58,12 +60,14 @@ function AgendamentoContent() {
       barber_id: parsed.barber_id,
       barber_name: parsed.barber_name,
       time: parsed.time,
-      first_name: parsed.first_name,
-      last_name: parsed.last_name,
+      first_name: parsed.first_name || "",
+      last_name: parsed.last_name || "",
       phone: parsed.phone,
+      // ADICIONE ESTA LINHA ABAIXO PARA MATAR O ERRO
+      name: parsed.name || `${parsed.first_name || ""} ${parsed.last_name || ""}`.trim(),
     });
 
-    setStep(1); // 🔥 COMEÇA NO INÍCIO
+    setStep(1);
     localStorage.removeItem("edit_booking");
   }, []);
 
@@ -134,7 +138,7 @@ function AgendamentoContent() {
     <main className="max-w-xl mx-auto pt-24 p-4">
       {step === 1 && (
         <StepDateTime
-          booking={booking}
+          booking={booking as any}
           setBooking={setBooking}
           onNext={() => setStep(2)}
         />
@@ -152,7 +156,6 @@ function AgendamentoContent() {
 
       {step === 3 && (
         <StepService
-          services={[]}
           slug={slug as string}
           booking={booking}
           setBooking={setBooking}

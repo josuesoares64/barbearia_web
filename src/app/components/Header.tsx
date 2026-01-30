@@ -4,7 +4,8 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import Menu from "./menu";
 import { FiLogOut } from "react-icons/fi";
 
-const Header = ({ shop }: { shop?: any }) => {
+// Adicionado custom aqui para bater com o que o layout envia
+const Header = ({ shop, custom }: { shop?: any, custom?: any }) => {
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -14,6 +15,7 @@ const Header = ({ shop }: { shop?: any }) => {
   const displayName = shop?.name || "Barbearia";
   
   const handleLogout = () => {
+    // Aqui você pode adicionar a limpeza de tokens se necessário
     router.push("/login");
   };
 

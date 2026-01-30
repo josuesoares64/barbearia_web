@@ -8,7 +8,7 @@ import { jwtDecode } from "jwt-decode";
 export function DashboardReport({ slug, token }: { slug: string; token: string }) {
   const [reportData, setReportData] = useState<any>(null);
   const [occupancyData, setOccupancyData] = useState<any>(null);
-  const [agendamentosBrutos, setAgendamentosBrutos] = useState([]);
+  const [agendamentosBrutos, setAgendamentosBrutos] = useState<any[]>([]);
   const [barbeiros, setBarbeiros] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

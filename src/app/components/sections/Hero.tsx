@@ -5,6 +5,7 @@ interface HeroProps {
   title?: string;
   subtitle?: string;
   slug: string;
+  banner?: string;
 }
 
 const Hero = ({ title, subtitle, slug }: HeroProps) => {
