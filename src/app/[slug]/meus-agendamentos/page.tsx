@@ -206,8 +206,7 @@ export default function MeusAgendamentos() {
                         appointment_date: e.target.value,
                       })
                     }
-                    className="w-full p-2 bg-black border text-white outline-none bg-black text-white border-zinc-800 
-  [&::-webkit-calendar-picker-indicator]:invert"
+                    className="w-full p-2 bg-black border text-white"
                   />
 
                   <select

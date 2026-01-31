@@ -301,8 +301,7 @@ const StepDateTime = ({
                 onChange={handleDateChange}
                 min={minDate}
                 max={maxDate}
-                className="w-full border p-3 rounded-md focus:ring-2 focus:ring-black outline-none outline-none bg-black text-white border-zinc-800 
-  [&::-webkit-calendar-picker-indicator]:invert"
+                className="w-full border p-3 rounded-md focus:ring-2 focus:ring-black outline-none"
               />
               
               {/* EXIBIÇÃO CORRETA DA DATA SELECIONADA */}

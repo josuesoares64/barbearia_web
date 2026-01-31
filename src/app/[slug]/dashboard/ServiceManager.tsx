@@ -353,8 +353,7 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
                   <option value="ALL" className="text-amber-500 font-bold">🚩 TODA A EQUIPE (FERIADO)</option>
                   {barbers.map(b => <option key={b.id} value={b.id}>{b.username}</option>)}
                 </select>
-                <input type="date" value={blockFormData.date} onChange={e => setBlockFormData({...blockFormData, date: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white outline-none bg-black text-white border-zinc-800 
-  [&::-webkit-calendar-picker-indicator]:invert" required />
+                <input type="date" value={blockFormData.date} onChange={e => setBlockFormData({...blockFormData, date: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white" required />
                 <div className="flex items-center gap-2 text-white text-[10px] font-bold uppercase"><input type="checkbox" checked={blockFormData.is_full_day} onChange={e => setBlockFormData({...blockFormData, is_full_day: e.target.checked})} /><span>Dia Inteiro</span></div>
                 {!blockFormData.is_full_day && (
                   <div className="grid grid-cols-2 gap-2">
