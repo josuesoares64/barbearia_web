@@ -59,13 +59,13 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
       }
 
       const [resFat, resAg, resOcup] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/${slug}/appointment/dashboard/faturamento?inicio=${dataInicio}&fim=${dataFim}${barbeiroQuery}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/appointment/dashboard/faturamento?inicio=${dataInicio}&fim=${dataFim}${barbeiroQuery}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/${slug}/appointment?inicio=${dataInicio}&fim=${dataFim}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/appointment?inicio=${dataInicio}&fim=${dataFim}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/${slug}/appointment/dashboard/ocupacao?inicio=${dataInicio}&fim=${dataFim}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/appointment/dashboard/ocupacao?inicio=${dataInicio}&fim=${dataFim}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
