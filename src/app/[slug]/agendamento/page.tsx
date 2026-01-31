@@ -78,7 +78,7 @@ function AgendamentoContent() {
     async function loadProfessionals() {
       if (!slug) return;
       const res = await fetch(
-        `$process.env.{NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers`
+        `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers`
       );
       const data = await res.json();
       setProfessionals(data);
