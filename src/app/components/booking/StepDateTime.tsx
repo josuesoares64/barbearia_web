@@ -40,7 +40,7 @@ const StepDateTime = ({
       setLoading(true);
       try {
         const response = await fetch(
-          `NEXT_PUBLIC_API_URL/barbershops/${slug}/hours`
+          `${NEXT_PUBLIC_API_URL}/barbershops/${slug}/hours`
         );
         
         if (response.ok) {

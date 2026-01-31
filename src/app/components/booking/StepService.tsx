@@ -20,7 +20,7 @@ export default function StepService({ booking, setBooking, onNext, onBack, slug 
     const fetchProfessionalServices = async () => {
       setLoading(true);
       try {
-        const url = `NEXT_PUBLIC_API_URL/barbershops/${slug}/barberservices/barbers/${booking.barber_id}/services`;
+        const url = `${NEXT_PUBLIC_API_URL}/barbershops/${slug}/barberservices/barbers/${booking.barber_id}/services`;
         const response = await fetch(url);
         const data = await response.json();
         

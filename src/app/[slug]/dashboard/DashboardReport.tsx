@@ -35,7 +35,7 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
     async function loadBarbers() {
       if (!slug || slug === "undefined") return;
       try {
-        const resB = await fetch(`NEXT_PUBLIC_API_URL/barbershops/${slug}/barbers`, { 
+        const resB = await fetch(`${NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers`, { 
           headers: { Authorization: `Bearer ${token}` } 
         });
         setBarbeiros(await resB.json());
@@ -59,13 +59,13 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
       }
 
       const [resFat, resAg, resOcup] = await Promise.all([
-        fetch(`NEXT_PUBLIC_API_URL/${slug}/appointment/dashboard/faturamento?inicio=${dataInicio}&fim=${dataFim}${barbeiroQuery}`, {
+        fetch(`${NEXT_PUBLIC_API_URL}/${slug}/appointment/dashboard/faturamento?inicio=${dataInicio}&fim=${dataFim}${barbeiroQuery}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`NEXT_PUBLIC_API_URL/${slug}/appointment?inicio=${dataInicio}&fim=${dataFim}`, {
+        fetch(`${NEXT_PUBLIC_API_URL}/${slug}/appointment?inicio=${dataInicio}&fim=${dataFim}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`NEXT_PUBLIC_API_URL/${slug}/appointment/dashboard/ocupacao?inicio=${dataInicio}&fim=${dataFim}`, {
+        fetch(`${NEXT_PUBLIC_API_URL}/${slug}/appointment/dashboard/ocupacao?inicio=${dataInicio}&fim=${dataFim}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -85,7 +85,7 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
   // FUNÇÕES DOS BOTÕES (RESTAURADAS)
   const handleFinalizar = async (id: string) => {
     try {
-      const res = await fetch(`NEXT_PUBLIC_API_URL/barbershops/${slug}/appointment/${id}/status`, {
+      const res = await fetch(`${NEXT_PUBLIC_API_URL}/barbershops/${slug}/appointment/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status: 'completed' })
@@ -100,7 +100,7 @@ export function DashboardReport({ slug, token }: { slug: string; token: string }
   const handleNoShow = async (id: string) => {
     if (!confirm("Confirmar que o cliente não compareceu?")) return;
     try {
-      const res = await fetch(`NEXT_PUBLIC_API_URL/barbershops/${slug}/appointment/${id}/status`, {
+      const res = await fetch(`${NEXT_PUBLIC_API_URL}/barbershops/${slug}/appointment/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status: 'no_show' })
