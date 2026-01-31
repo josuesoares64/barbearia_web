@@ -34,7 +34,7 @@ export default function MeusAgendamentos() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/barbershops/${slug}/appointment/check/${phone}`
+        `NEXT_PUBLIC_API_URL/barbershops/${slug}/appointment/check/${phone}`
       );
       const data = await res.json();
       setAppointments(Array.isArray(data) ? data : [data]);
@@ -53,7 +53,7 @@ export default function MeusAgendamentos() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/barbershops/${slug}/appointment/cancel/client`,
+        `NEXT_PUBLIC_API_URL/barbershops/${slug}/appointment/cancel/client`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -89,8 +89,8 @@ export default function MeusAgendamentos() {
     });
 
     const [barbersRes, servicesRes] = await Promise.all([
-      fetch(`http://localhost:3000/barbershops/${slug}/barbers`),
-      fetch(`http://localhost:3000/barbershops/${slug}/services`),
+      fetch(`NEXT_PUBLIC_API_URL/barbershops/${slug}/barbers`),
+      fetch(`NEXT_PUBLIC_API_URL/barbershops/${slug}/services`),
     ]);
 
     setBarbers(await barbersRes.json());
@@ -110,7 +110,7 @@ export default function MeusAgendamentos() {
 
     async function loadAvailability() {
       const res = await fetch(
-        `http://localhost:3000/barbershops/${slug}/availability?barber_id=${editData.barber_id}&service_id=${editData.service_id}&data=${editData.appointment_date}`
+        `NEXT_PUBLIC_API_URL/barbershops/${slug}/availability?barber_id=${editData.barber_id}&service_id=${editData.service_id}&data=${editData.appointment_date}`
       );
 
       const data = await res.json();
@@ -131,7 +131,7 @@ export default function MeusAgendamentos() {
   const handleSaveEdit = async (appointmentId: string) => {
     try {
       const res = await fetch(
-        `http://localhost:3000/barbershops/${slug}/appointment/${appointmentId}`,
+        `NEXT_PUBLIC_API_URL/barbershops/${slug}/appointment/${appointmentId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -206,7 +206,8 @@ export default function MeusAgendamentos() {
                         appointment_date: e.target.value,
                       })
                     }
-                    className="w-full p-2 bg-black border text-white"
+                    className="w-full p-2 bg-black border text-white outline-none bg-black text-white border-zinc-800 
+  [&::-webkit-calendar-picker-indicator]:invert"
                   />
 
                   <select

@@ -40,7 +40,7 @@ const StepDateTime = ({
       setLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:3000/barbershops/${slug}/hours`
+          `NEXT_PUBLIC_API_URL/barbershops/${slug}/hours`
         );
         
         if (response.ok) {
@@ -301,7 +301,8 @@ const StepDateTime = ({
                 onChange={handleDateChange}
                 min={minDate}
                 max={maxDate}
-                className="w-full border p-3 rounded-md focus:ring-2 focus:ring-black outline-none"
+                className="w-full border p-3 rounded-md focus:ring-2 focus:ring-black outline-none outline-none bg-black text-white border-zinc-800 
+  [&::-webkit-calendar-picker-indicator]:invert"
               />
               
               {/* EXIBIÇÃO CORRETA DA DATA SELECIONADA */}

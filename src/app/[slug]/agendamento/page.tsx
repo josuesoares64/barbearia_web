@@ -78,7 +78,7 @@ function AgendamentoContent() {
     async function loadProfessionals() {
       if (!slug) return;
       const res = await fetch(
-        `http://localhost:3000/barbershops/${slug}/barbers`
+        `NEXT_PUBLIC_API_URL/barbershops/${slug}/barbers`
       );
       const data = await res.json();
       setProfessionals(data);
@@ -93,7 +93,7 @@ function AgendamentoContent() {
     async function fetchAvailability() {
       if (!booking.barber_id || !booking.date || !booking.service_id) return;
 
-      const url = `http://localhost:3000/barbershops/${slug}/availability?barber_id=${booking.barber_id}&service_id=${booking.service_id}&data=${booking.date}`;
+      const url = `NEXT_PUBLIC_API_URL/barbershops/${slug}/availability?barber_id=${booking.barber_id}&service_id=${booking.service_id}&data=${booking.date}`;
       const res = await fetch(url);
       const times = await res.json();
       setAvailableTimes(Array.isArray(times) ? times : []);
@@ -114,7 +114,7 @@ function AgendamentoContent() {
 
 
   const res = await fetch(
-    `http://localhost:3000/barbershops/${slug}/appointment`,
+    `NEXT_PUBLIC_API_URL/barbershops/${slug}/appointment`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
