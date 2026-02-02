@@ -4,6 +4,7 @@ import { ServiceManager } from "./ServiceManager";
 import { cookies } from "next/headers";
 import { HoursManager } from "./HoursManager";
 import { PageManager } from "./PageManager";
+import { ProductForm } from "./ProductForm";
 
 export default async function DashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   // 1. Resolve o slug
@@ -22,6 +23,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ slug
         <ServiceManager slug={slug} token={token} />
 
         <HoursManager slug={slug} token={token} />
+
+        <ProductForm slug={slug} token={token} />
 
         <PageManager slug={slug} token={token} />
         

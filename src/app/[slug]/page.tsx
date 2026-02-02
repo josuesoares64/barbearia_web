@@ -3,6 +3,7 @@ import Servicos from "../components/sections/servicos";
 import Sobre from "../components/sections/Sobre";
 import Localizacao from "../components/sections/localizacao";
 import PerguntasFrequentes from "../components/sections/PerguntasFrequentes";
+import { ProductList } from "../components/sections/ProductList";
 
 // Funções para buscar os dados no seu backend
 async function getBarbershopData(slug: string) {
@@ -80,6 +81,8 @@ export default async function Home({ params }: { params: Promise<{ slug: string 
         instagram={customization?.instagram_url}
         whatsapp={customization?.whatsapp_url}
       />
+
+      <ProductList slug={slug} />
     </main>
   );
 }
