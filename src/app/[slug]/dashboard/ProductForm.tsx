@@ -1,11 +1,13 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function ProductForm({ slug, token }: { slug: string; token: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [isOwner, setIsOwner] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -14,61 +16,55 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
   });
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const isEditing = Boolean(editingId);
+  const [isEditing, setIsEditing] = useState(false);
 
   /* ===============================
-     PERMISSÃO (UI ONLY)
+     PERMISSÃO
   =============================== */
-  const isOwner = useMemo(() => {
-    if (!token) return false;
+  useEffect(() => {
+    if (!token) return;
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.role?.toLowerCase() === "dono";
-    } catch {
-      return false;
+      setIsOwner(payload.role?.toLowerCase() === "dono");
+    } catch (err) {
+      console.error(err);
     }
   }, [token]);
 
   /* ===============================
      BUSCAR PRODUTOS
   =============================== */
-  const fetchProducts = useCallback(async () => {
-    if (!slug || !token) return;
+  useEffect(() => {
+    if (slug) fetchProducts();
+  }, [slug]);
 
+  const fetchProducts = async () => {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-
-    if (res.ok) {
-      setProducts(await res.json());
-    }
-  }, [slug, token]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (res.ok) setProducts(await res.json());
+  };
 
   /* ===============================
      CREATE / UPDATE
   =============================== */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
-
     setLoading(true);
 
     try {
       const cleanPrice = formData.price.replace(/\./g, "").replace(",", ".");
       const payload = {
-        name: formData.name.trim(),
-        price: Number(cleanPrice).toFixed(2),
-        stock_quantity: Number(formData.stock_quantity),
+        name: formData.name,
+        price: parseFloat(cleanPrice).toFixed(2),
+        stock_quantity: parseInt(formData.stock_quantity),
       };
 
-      const url = isEditing
-        ? `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products/${editingId}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products`;
+      const url =
+        isEditing && editingId
+          ? `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products/${editingId}`
+          : `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products`;
 
       const res = await fetch(url, {
         method: isEditing ? "PUT" : "POST",
@@ -92,8 +88,7 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
      DELETE
   =============================== */
   const handleDelete = async (id: string) => {
-    if (deletingId || !confirm("Excluir este produto?")) return;
-
+    if (!confirm("Excluir este produto?")) return;
     setDeletingId(id);
 
     await fetch(
@@ -118,12 +113,13 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
       stock_quantity: product.stock_quantity.toString(),
     });
     setEditingId(product.id);
-    setIsOpen(true);
+    setIsEditing(true);
   };
 
   const resetForm = () => {
     setFormData({ name: "", price: "", stock_quantity: "" });
     setEditingId(null);
+    setIsEditing(false);
   };
 
   /* ===============================
@@ -131,7 +127,8 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
   =============================== */
   return (
     <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4">
-      {/* HEADER */}
+      
+      {/* HEADER COMPACTO */}
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-white font-bold text-sm uppercase">
@@ -144,7 +141,7 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
 
         {isOwner && (
           <button
-            onClick={() => setIsOpen((v) => !v)}
+            onClick={() => setIsOpen(!isOpen)}
             className="bg-amber-500 text-black text-[10px] font-black px-3 py-2 rounded uppercase"
           >
             {isOpen ? "Fechar" : "Gerenciar"}
@@ -152,30 +149,33 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
         )}
       </div>
 
-      {/* CONTEÚDO */}
+      {/* CONTEÚDO EXPANSÍVEL – APENAS DONO */}
       {isOwner && isOpen && (
         <div className="mt-4 pt-4 border-t border-zinc-800 space-y-6">
+
           {/* FORM */}
           <form
             onSubmit={handleSubmit}
             className="grid grid-cols-1 md:grid-cols-3 gap-3"
           >
             <input
+              type="text"
               placeholder="Nome"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="input"
+              className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
               required
             />
             <input
+              type="text"
               placeholder="Preço"
               value={formData.price}
               onChange={(e) =>
                 setFormData({ ...formData, price: e.target.value })
               }
-              className="input"
+              className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
               required
             />
             <input
@@ -188,11 +188,12 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
                   stock_quantity: e.target.value,
                 })
               }
-              className="input"
+              className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
               required
             />
 
             <button
+              type="submit"
               disabled={loading}
               className="md:col-span-3 bg-amber-500 text-black text-[10px] font-black py-2.5 rounded uppercase"
             >
@@ -235,6 +236,7 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
               </div>
             ))}
           </div>
+
         </div>
       )}
     </div>
