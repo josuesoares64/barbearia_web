@@ -73,7 +73,6 @@ export function OccupancyMetrics({ data }: { data: any }) {
 
               <div className="flex justify-between text-[9px] text-zinc-600 font-medium uppercase">
                 <span>Trabalhado: {barbeiro.minutosTrabalhados} min</span>
-                <span>8h/dia</span>
               </div>
             </div>
           ))}
