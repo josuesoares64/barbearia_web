@@ -45,7 +45,7 @@ O sistema foi pensado para atender **múltiplas barbearias**, utilizando **slug 
 ---
 
 ## 📂 Estrutura do Projeto
-
+```bash
 src/
 ├── app/
 │ ├── [slug]/
@@ -71,14 +71,15 @@ public/
 GET /barbershops/:slug
 GET /barbershops/:slug/availability?date=YYYY-MM-DD
 POST /appointments
-
+```
 
 ---
 
 ## ▶️ Como Rodar o Projeto Localmente
 
-1. Clone o repositório:
 ```bash
+
+1. Clone o repositório:
 git clone https://github.com/josuesoares64/barbearia_web.git
 
 Acesse a pasta:
