@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💈 Barbearia Web — Front-end SaaS
 
-## Getting Started
+Front-end de um **SaaS para gestão de barbearias**, desenvolvido com **Next.js (App Router)** e **TypeScript**, consumindo uma API própria.
 
-First, run the development server:
+O sistema foi pensado para atender **múltiplas barbearias**, utilizando **slug na URL** para carregar dados dinâmicos de cada cliente do SaaS.
 
+---
+
+## 🚀 Funcionalidades
+
+- 🌐 Sistema multi-barbearia via **slug** (`/barbearia-do-lucas`)
+- 📅 Agendamento de horários
+- 📊 Dashboard com métricas de agendamentos
+- 🗂️ Gerenciamento de agendamentos
+- 🔐 Área de login
+- 🧠 Context API para estado global
+- 📱 Layout responsivo
+- ⚙️ Middleware para controle de acesso
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Next.js** (App Router)
+- **React**
+- **TypeScript**
+- **CSS Modules / Global CSS**
+- **Context API**
+- **Middleware (Next.js)**
+- **Consumo de API REST**
+- **Git & GitHub**
+
+---
+
+## 🧠 Arquitetura e Conceitos Aplicados
+
+- **App Router (`src/app`)**
+- **Rotas dinâmicas com slug**
+- **Layouts aninhados**
+- **Separação por domínio de funcionalidade**
+- **Tipagem forte com TypeScript**
+- **Middleware para proteção de rotas**
+- **Projeto desacoplado do back-end**
+
+---
+
+## 📂 Estrutura do Projeto
+
+``
+src/
+├── app/
+│ ├── [slug]/
+│ │ ├── agendamento/
+│ │ ├── dashboard/
+│ │ ├── meus-agendamentos/
+│ │ ├── layout.tsx
+│ │ └── page.tsx
+│ ├── components/
+│ ├── login/
+│ ├── types/
+│ ├── globals.css
+│ ├── layout.tsx
+│ └── page.tsx
+├── contexts/
+├── middleware.ts
+public/
+│ ├── logo.png
+│ ├── imagem-hero.avif
+│ └── ilustrativa-sobre.jpg
+``
+
+GET /barbershops/:slug
+GET /barbershops/:slug/availability?date=YYYY-MM-DD
+POST /appointments
+
+
+---
+
+## ▶️ Como Rodar o Projeto Localmente
+
+1. Clone o repositório:
 ```bash
+git clone https://github.com/josuesoares64/barbearia_web.git
+
+Acesse a pasta:
+
+cd barbearia_web
+
+
+Instale as dependências:
+
+npm install
+
+
+Rode o projeto:
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Acesse no navegador:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+http://localhost:3000
 
-## Learn More
+📈 Status do Projeto
 
-To learn more about Next.js, take a look at the following resources:
+🚧 Em desenvolvimento ativo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Funcionalidades futuras:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Autenticação completa com JWT
 
-## Deploy on Vercel
+Proteção avançada de rotas
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Área administrativa do dono da barbearia
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Métricas financeiras
+
+Publicação como produto SaaS
+
+👨‍💻 Autor
+
+Josué Bezerra Soares
+Desenvolvedor Full Stack
+
+GitHub: https://github.com/josuesoares64
