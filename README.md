@@ -46,7 +46,6 @@ O sistema foi pensado para atender **múltiplas barbearias**, utilizando **slug 
 
 ## 📂 Estrutura do Projeto
 
-``
 src/
 ├── app/
 │ ├── [slug]/
@@ -67,7 +66,7 @@ public/
 │ ├── logo.png
 │ ├── imagem-hero.avif
 │ └── ilustrativa-sobre.jpg
-``
+
 
 GET /barbershops/:slug
 GET /barbershops/:slug/availability?date=YYYY-MM-DD
