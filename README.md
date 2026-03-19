@@ -46,6 +46,7 @@ O sistema foi pensado para atender **múltiplas barbearias**, utilizando **slug 
 
 ## 📂 Estrutura do Projeto
 ```bash
+
 src/
 ├── app/
 │ ├── [slug]/

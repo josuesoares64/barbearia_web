@@ -6,7 +6,7 @@ export function DashboardWelcome() {
   const { user } = useAuth() as { user: any }; 
   
   const obterPrimeiroNome = () => {
-    // 1. Tenta pegar o nome real (Josué Soares -> Josué)
+    // 1. Tenta pegar o nome real
     if (user?.username) {
       return user.username.split(' ')[0];
     }
