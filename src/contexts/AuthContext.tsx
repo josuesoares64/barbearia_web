@@ -15,9 +15,10 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  loading: boolean;
   login: (email: string, senha: string) => Promise<void>;
   logout: () => void;
-  loading: boolean;
+  cadastrar: (dados: { username: string; email: string; senha: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -35,55 +36,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         setUser(JSON.parse(savedUser));
       } catch (e) {
-        console.error("Erro ao carregar usuário salvo");
+        logout();
       }
     }
     setLoading(false);
   }, []);
 
   const login = async (email: string, senha: string) => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha }),
-      });
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, senha }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Erro no login");
 
-      if (!response.ok) throw new Error(data.message || "Erro no login");
+    const token = data.accessToken;
+    const decoded: any = jwtDecode(token);
+    const slug = data.slug || decoded.slug || "";
 
-      // 1. Decodifica o Token que o Backend gerou (com o novo campo 'slug')
-      const token = data.accessToken; 
-      const decoded: any = jwtDecode(token);
+    const userData: User = {
+      id: decoded.id,
+      email: decoded.email,
+      role: (decoded.role || "").toLowerCase(),
+      slug: slug,
+    };
 
-      // 2. Captura o slug dinâmico (prioriza o que vem no JSON, fallback para o Token)
-      const slugDaBarbearia = data.slug || decoded.slug; 
+    Cookies.set("barber.token", token, { expires: 7 });
+    Cookies.set("barber.user", JSON.stringify(userData), { expires: 7 });
+    setUser(userData);
 
-      if (!slugDaBarbearia) {
-        throw new Error("Erro: Unidade não identificada para este usuário.");
-      }
-
-      const userData: User = {
-        id: decoded.id,
-        email: decoded.email,
-        // Garante que 'Dono' ou 'Barbeiro' vire 'dono' ou 'barbeiro'
-        role: (decoded.role || "").toLowerCase(),
-        slug: slugDaBarbearia
-      };
-
-      // 3. Persistência nos Cookies
-      Cookies.set("barber.token", token, { expires: 7 });
-      Cookies.set("barber.user", JSON.stringify(userData), { expires: 7 });
-
-      setUser(userData);
-
-      // 4. Redirecionamento Dinâmico para a barbearia correta do banco
-      router.push(`/${slugDaBarbearia}/dashboard`); 
-      
-    } catch (error: any) {
-      alert(error.message);
+    // Redirecionamento inteligente
+    if (!slug) {
+      router.push("/criar-barbearia");
+    } else {
+      router.push(`/${slug}/dashboard`);
     }
+  };
+
+  const cadastrar = async ({ username, email, senha }: any) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, senha }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Erro ao criar conta");
   };
 
   const logout = () => {
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, cadastrar, loading }}>
       {children}
     </AuthContext.Provider>
   );

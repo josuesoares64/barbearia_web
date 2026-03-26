@@ -1,5 +1,4 @@
-import { DashboardWelcome } from "./DashboardWelcome";
-import { DashboardReport } from "./DashboardReport";
+import { ProductForm } from "../ProductForm";
 import { cookies } from "next/headers";
 
 export default async function DashboardPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -13,9 +12,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ slug
   return (
     <main className="min-h-screen bg-zinc-950">
       <div className="p-8 max-w-7xl mx-auto flex flex-col gap-8">
-        <DashboardWelcome />
-        
-        <DashboardReport slug={slug} token={token} />
+        <h2 className="text-white text-3xl font-bold text-center">Produtos</h2>
+        <ProductForm slug={slug} token={token} />
       </div>
     </main>
   );

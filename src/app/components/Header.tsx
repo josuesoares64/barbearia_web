@@ -44,7 +44,7 @@ const Header = ({ shop, custom }: { shop?: any, custom?: any }) => {
           <button 
             onClick={handleLogout}
             className="flex items-center gap-2 px-3 py-2 font-black text-red-500 border border-red-500/30 text-[10px] uppercase"
-          >
+          > login
             <FiLogOut size={16} />
           </button>
         )}
