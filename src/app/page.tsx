@@ -46,7 +46,7 @@ const problems = [
 const plans = [
   {
     name: "Starter",
-    price: 49,
+    price: 89,
     desc: "Para barbeiros autônomos que querem organização profissional.",
     highlight: false,
     features: [
@@ -66,7 +66,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: 99,
+    price: 159,
     desc: "Para barbearias com equipe. Controle total de cada cadeira.",
     highlight: true,
     features: [
@@ -82,7 +82,7 @@ const plans = [
   },
   {
     name: "Premium",
-    price: 199,
+    price: 239,
     desc: "Para donos de franquia ou múltiplas unidades.",
     highlight: false,
     features: [
