@@ -52,7 +52,7 @@ export default function CadastrarPage() {
             className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none focus:ring-2 focus:ring-amber-500" />
 
           <button type="submit" disabled={isLoading} className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-700 text-zinc-950 font-bold py-3 rounded-lg transition-all">
-            {isLoading ? "Processando..." : "Criar Conta e Entrar"}
+            {isLoading ? "Processando..." : "Criar Contando"}
           </button>
         </form>
       </div>

@@ -12,20 +12,16 @@ type StepDateTimeProps = {
 
 type BusinessHours = {
   id: string;
-  weekday: number; // API: 0 = Domingo, 1 = Segunda, etc.
+  weekday: number;
   open_time: string;
   close_time: string;
   barbershop_id: string;
 };
 
-const StepDateTime = ({
-  booking,
-  setBooking,
-  onNext,
-}: StepDateTimeProps) => {
+const StepDateTime = ({ booking, setBooking, onNext }: StepDateTimeProps) => {
   const router = useRouter();
   const { slug } = useParams();
-  
+
   const [loading, setLoading] = useState(false);
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [closedDays, setClosedDays] = useState<number[]>([]);
@@ -36,25 +32,18 @@ const StepDateTime = ({
   useEffect(() => {
     const fetchBusinessHours = async () => {
       if (!slug) return;
-      
       setLoading(true);
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/hours`
         );
-        
         if (response.ok) {
           const data: BusinessHours[] = await response.json();
           setBusinessHours(data);
-          
-          // Determinar quais dias da semana estão FECHADOS
           const allWeekdays = [0, 1, 2, 3, 4, 5, 6];
-          const workingDays = [...new Set(data.map(hour => hour.weekday))];
-          const closed = allWeekdays.filter(day => !workingDays.includes(day));
-          
+          const workingDays = [...new Set(data.map((hour) => hour.weekday))];
+          const closed = allWeekdays.filter((day) => !workingDays.includes(day));
           setClosedDays(closed);
-          console.log("API - Dias que trabalha:", workingDays);
-          console.log("API - Dias FECHADOS:", closed);
         }
       } catch (error) {
         console.error("Erro ao buscar horários:", error);
@@ -62,293 +51,214 @@ const StepDateTime = ({
         setLoading(false);
       }
     };
-
     fetchBusinessHours();
   }, [slug]);
 
-  // 2. CONFIGURAR DATAS MÍNIMA E MÁXIMA
+  // 2. CONFIGURAR DATAS
   useEffect(() => {
-    // ⭐ FUNÇÃO CORRETA: Obter data atual sem problemas de fuso
     const getTodayWithoutTimezone = (): string => {
       const now = new Date();
       const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
     };
 
-    // ⭐ FUNÇÃO CORRETA: Adicionar dias sem problemas de fuso
     const addDaysWithoutTimezone = (dateStr: string, days: number): string => {
-      const [year, month, day] = dateStr.split('-').map(Number);
+      const [year, month, day] = dateStr.split("-").map(Number);
       const date = new Date(year, month - 1, day + days);
-      
-      const newYear = date.getFullYear();
-      const newMonth = String(date.getMonth() + 1).padStart(2, '0');
-      const newDay = String(date.getDate()).padStart(2, '0');
-      
-      return `${newYear}-${newMonth}-${newDay}`;
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     };
 
     const today = getTodayWithoutTimezone();
-    const maxDateStr = addDaysWithoutTimezone(today, 60);
-    
     setMinDate(today);
-    setMaxDate(maxDateStr);
-    
-    console.log("Datas configuradas:", { min: today, max: maxDateStr });
+    setMaxDate(addDaysWithoutTimezone(today, 60));
   }, []);
 
-  // ⭐ 3. FUNÇÃO CORRETA: Obter dia da semana de uma string YYYY-MM-DD
   const getWeekdayFromDateString = (dateStr: string): number => {
-    // Divide a string YYYY-MM-DD
-    const [year, month, day] = dateStr.split('-').map(Number);
-    
-    // Cria data no meio-dia para evitar problemas de fuso
-    const date = new Date(year, month - 1, day, 12, 0, 0);
-    
-    // Retorna o dia da semana: 0=Domingo, 6=Sábado
-    return date.getDay();
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day, 12, 0, 0).getDay();
   };
 
-  // ⭐ 4. FUNÇÃO CORRETA: Formatar data para exibição
+  const getWeekdayName = (weekday: number): string => {
+    const days = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+    return days[weekday] || `Dia ${weekday}`;
+  };
+
   const formatDateForDisplay = (dateStr: string): string => {
     if (!dateStr) return "";
-    
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const date = new Date(year, month - 1, day, 12, 0, 0);
-    
-    const formattedDay = String(day).padStart(2, '0');
-    const formattedMonth = String(month).padStart(2, '0');
-    const weekday = getWeekdayFromDateString(dateStr);
-    const weekdayName = getWeekdayName(weekday);
-    
-    return `${formattedDay}/${formattedMonth}/${year} (${weekdayName})`;
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year} (${getWeekdayName(getWeekdayFromDateString(dateStr))})`;
   };
 
-  // ⭐ 5. FUNÇÃO CORRETA: Validar se é data passada
-  const isPastDate = (dateStr: string): boolean => {
-    const todayStr = minDate; // minDate já é "hoje" no formato YYYY-MM-DD
-    
-    // Comparação simples de strings YYYY-MM-DD
-    return dateStr < todayStr;
-  };
+  const isPastDate = (dateStr: string): boolean => dateStr < minDate;
 
-  // 6. FUNÇÃO PARA BLOQUEAR DIAS FECHADOS
   function handleDateChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selectedDate = e.target.value;
-    
     if (!selectedDate) {
       setBooking((prev: any) => ({ ...prev, date: "" }));
       return;
     }
-    
-    console.log("Data selecionada (raw):", selectedDate);
-    
-    // Verificar se é data PASSADA
     if (isPastDate(selectedDate)) {
-      alert("⚠️ Não é possível agendar para datas passadas! Escolha uma data futura.");
+      alert("Não é possível agendar para datas passadas.");
       setBooking((prev: any) => ({ ...prev, date: "" }));
       return;
     }
-    
-    // Obter dia da semana CORRETAMENTE
     const weekday = getWeekdayFromDateString(selectedDate);
-    console.log("Dia da semana calculado:", {
-      date: selectedDate,
-      weekday: weekday,
-      weekdayName: getWeekdayName(weekday)
-    });
-    
-    // Verificar se é um dia FECHADO
     if (closedDays.includes(weekday)) {
-      alert(`⚠️ A barbearia não funciona às ${getWeekdayName(weekday)}s!`);
+      alert(`A barbearia não funciona às ${getWeekdayName(weekday)}s.`);
       setBooking((prev: any) => ({ ...prev, date: "" }));
       return;
     }
-    
-    // Se passou nas validações, atualiza o estado
-    setBooking((prev: any) => ({
-      ...prev,
-      date: selectedDate,
-    }));
-    
-    console.log("Data válida selecionada:", {
-      date: selectedDate,
-      display: formatDateForDisplay(selectedDate)
-    });
+    setBooking((prev: any) => ({ ...prev, date: selectedDate }));
   }
 
-  // 7. FUNÇÕES AUXILIARES
-  const getWeekdayName = (weekday: number): string => {
-    const days = [
-      "Domingo", "Segunda", "Terça", "Quarta", 
-      "Quinta", "Sexta", "Sábado"
-    ];
-    return days[weekday] || `Dia ${weekday}`;
-  };
-
-  // 8. RENDERIZAR DIAS FECHADOS
-  const renderClosedDaysInfo = () => {
-    if (closedDays.length === 0) return null;
-    
-    return (
-      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-        <p className="text-sm font-medium text-red-800 mb-2">
-          ⚠️ Dias da semana fechados:
-        </p>
-        <ul className="text-sm text-red-700 space-y-1">
-          {closedDays
-            .sort((a, b) => a - b)
-            .map(day => (
-              <li key={day} className="flex items-center">
-                <span className="mr-2">•</span>
-                {getWeekdayName(day)}-feira
-              </li>
-            ))}
-        </ul>
-      </div>
-    );
-  };
-
-  // 9. RENDERIZAR HORÁRIOS DE FUNCIONAMENTO
-  const renderBusinessHours = () => {
-    if (businessHours.length === 0) return null;
-    
-    const hoursByDay: Record<number, BusinessHours[]> = {};
-    businessHours.forEach(hour => {
-      if (!hoursByDay[hour.weekday]) {
-        hoursByDay[hour.weekday] = [];
-      }
-      hoursByDay[hour.weekday].push(hour);
-    });
-    
-    const sortedDays = Object.keys(hoursByDay)
-      .map(Number)
-      .sort((a, b) => a - b);
-    
-    return (
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-3">Horários de Funcionamento</h3>
-        <div className="space-y-2">
-          {sortedDays.map(weekday => (
-            <div key={weekday} className="flex items-center justify-between py-2 border-b border-gray-100">
-              <span className="font-medium">{getWeekdayName(weekday)}</span>
-              <div className="text-right">
-                {hoursByDay[weekday].map((hour, index) => (
-                  <div key={hour.id} className="text-sm text-gray-600">
-                    {hour.open_time.slice(0, 5)} - {hour.close_time.slice(0, 5)}
-                    {index < hoursByDay[weekday].length - 1 && " e "}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
+  // Agrupar horários por dia
+  const hoursByDay: Record<number, BusinessHours[]> = {};
+  businessHours.forEach((hour) => {
+    if (!hoursByDay[hour.weekday]) hoursByDay[hour.weekday] = [];
+    hoursByDay[hour.weekday].push(hour);
+  });
+  const sortedDays = Object.keys(hoursByDay).map(Number).sort((a, b) => a - b);
 
   return (
-    <div className="space-y-6">
-      {/* Botões Superiores */}
-      <div className="flex gap-2">
-        <button 
+    <div className="space-y-4 pb-24">
+
+      {/* ── Botões superiores ── */}
+      <div className="grid grid-cols-2 gap-3">
+        <button
           type="button"
           onClick={() => router.push(`/${slug}/meus-agendamentos`)}
-          className="flex-1 flex items-center justify-center gap-2 text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-md border border-gray-300 transition-all"
+          className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-black uppercase tracking-widest py-3.5 rounded-xl border border-zinc-700 transition-all"
         >
-          🔍 MEUS AGENDAMENTOS
+          🔍 Meus agendamentos
         </button>
-        <button 
+        <button
           type="button"
-          onClick={() => router.push(`/login`)}
-          className="flex-1 flex items-center justify-center gap-2 text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-md border border-gray-300 transition-all"
+          onClick={() => router.push(`/login?from=${slug}`)}
+          className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-black uppercase tracking-widest py-3.5 rounded-xl border border-zinc-700 transition-all"
         >
-          👤 ÁREA PROFISSIONAL
+          👤 Área profissional
         </button>
       </div>
 
-      <div className="relative py-2">
+      {/* ── Divisor ── */}
+      <div className="relative py-1">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-gray-200"></span>
+          <span className="w-full border-t border-zinc-800" />
         </div>
-        <div className="relative flex justify-center text-[10px] uppercase">
-          <span className="bg-white px-3 text-gray-400 font-bold tracking-widest">
-            Ou agende um horário
+        <div className="relative flex justify-center">
+          <span className="bg-black px-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
+            ou agende um horário
           </span>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold">Escolha a data</h2>
+      {/* ── Escolha a data ── */}
+      <div className="space-y-3">
+        <h2 className="text-lg font-black uppercase tracking-tight text-white">
+          Escolha a data
+        </h2>
 
         {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
-            <p className="mt-3 text-gray-600">Carregando horários...</p>
+          <div className="flex flex-col items-center py-12 gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500" />
+            <p className="text-zinc-500 text-sm">Carregando horários...</p>
           </div>
         ) : (
           <>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione uma data disponível:
+            {/* Input de data */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                Selecione uma data disponível
               </label>
-              
-              {/* INPUT COM DATAS CORRETAS */}
               <input
                 type="date"
                 value={booking.date || ""}
                 onChange={handleDateChange}
                 min={minDate}
                 max={maxDate}
-                className="w-full border p-3 rounded-md focus:ring-2 focus:ring-black outline-none"
+                className="w-full bg-zinc-900 border border-zinc-700 text-white p-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
               />
-              
-              {/* EXIBIÇÃO CORRETA DA DATA SELECIONADA */}
-              <div className="mt-3 space-y-2">
-                {booking.date && (
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-green-800 font-medium">
-                      ✅ {formatDateForDisplay(booking.date)}
-                    </p>
-                    <p className="text-xs text-green-600 mt-1">
-                      Clique em "Próximo" para continuar
-                    </p>
-                  </div>
-                )}
-                
-                <div className="text-sm text-gray-600 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                  <p className="font-medium text-blue-800 mb-2">📅 Período disponível:</p>
-                  <ul className="space-y-1">
-                    <li className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      <span>De <strong>{formatDateForDisplay(minDate)}</strong> até <strong>{formatDateForDisplay(maxDate)}</strong></span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                      <span>Exceto dias passados e dias fechados</span>
-                    </li>
-                  </ul>
+            </div>
+
+            {/* Data selecionada */}
+            {booking.date && (
+              <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3">
+                <span className="text-amber-500 text-lg">✓</span>
+                <div>
+                  <p className="text-amber-400 font-black text-sm">{formatDateForDisplay(booking.date)}</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Clique em "Próximo" para continuar</p>
                 </div>
               </div>
+            )}
+
+            {/* Período disponível */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 space-y-2">
+              <p className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                Período disponível
+              </p>
+              <div className="flex items-center gap-2 text-sm text-zinc-300">
+                <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                {formatDateForDisplay(minDate)} → {formatDateForDisplay(maxDate)}
+              </div>
+              {closedDays.length > 0 && (
+                <div className="flex items-start gap-2 text-sm text-zinc-500">
+                  <span className="w-2 h-2 rounded-full bg-red-500 shrink-0 mt-1.5" />
+                  <span>
+                    Fechado às{" "}
+                    {closedDays
+                      .sort((a, b) => a - b)
+                      .map((d) => getWeekdayName(d))
+                      .join(", ")}
+                  </span>
+                </div>
+              )}
             </div>
-            
-            {/* Mostrar dias fechados */}
-            {renderClosedDaysInfo()}
-            
-            {/* Mostrar horários de funcionamento */}
-            {renderBusinessHours()}
+
+            {/* Horários de funcionamento */}
+            {sortedDays.length > 0 && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-zinc-800">
+                  <p className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                    Horários de funcionamento
+                  </p>
+                </div>
+                <div className="divide-y divide-zinc-800/60">
+                  {sortedDays.map((weekday) => (
+                    <div
+                      key={weekday}
+                      className="flex items-center justify-between px-4 py-3"
+                    >
+                      <span className="text-sm font-bold text-white">
+                        {getWeekdayName(weekday)}
+                      </span>
+                      <div className="flex flex-col items-end gap-0.5">
+                        {hoursByDay[weekday].map((hour) => (
+                          <span key={hour.id} className="text-xs text-amber-500 font-bold">
+                            {hour.open_time.slice(0, 5)} – {hour.close_time.slice(0, 5)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
+      </div>
 
+      {/* ── Botão próximo (fixo no fundo) ── */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-sm border-t border-zinc-800">
         <button
           type="button"
           disabled={!booking.date}
           onClick={onNext}
-          className={`w-full py-3 rounded-md font-bold transition-all mt-6 ${
+          className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm transition-all ${
             booking.date
-              ? "bg-black text-white cursor-pointer hover:bg-gray-800" 
-              : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50"
+              ? "bg-amber-500 text-black hover:bg-amber-400 active:scale-95"
+              : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
           }`}
         >
           {booking.date ? "Próximo →" : "Selecione uma data"}
