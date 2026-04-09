@@ -55,7 +55,7 @@ const problems = [
 const plans = [
   {
     name: "Starter",
-    price: 44,5,
+    price: 44.5,
     desc: "Para autônomos que querem sair do caderno e do WhatsApp.",
     highlight: false,
     features: [
@@ -75,7 +75,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: 79,5,
+    price: 79.5,
     desc: "Para negócios com equipe. Visão completa do que acontece na sua unidade.",
     highlight: true,
     features: [
@@ -91,7 +91,7 @@ const plans = [
   },
   {
     name: "Premium",
-    price: 119,5,
+    price: 119.5,
     desc: "Para quem tem equipe grande e precisa de controle individual de cada profissional.",
     highlight: false,
     features: [
