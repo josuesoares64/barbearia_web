@@ -5,7 +5,6 @@ import Localizacao from "../components/sections/localizacao";
 import PerguntasFrequentes from "../components/sections/PerguntasFrequentes";
 import { ProductList } from "../components/sections/ProductList";
 
-// Funções para buscar os dados no seu backend
 async function getBarbershopData(slug: string) {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}`, { 
@@ -32,19 +31,15 @@ async function getCustomization(slug: string) {
   }
 }
 
-// Em Next.js 15, params é uma Promise
 export default async function Home({ params }: { params: Promise<{ slug: string }> }) {
   
-  // 1. Desembrulha o slug usando await
   const { slug } = await params;
 
-  // 2. Busca os dados em paralelo
   const [shop, customization] = await Promise.all([
     getBarbershopData(slug),
     getCustomization(slug)
   ]);
 
-  // 3. Validação: Se não encontrou a barbearia no banco
   if (!shop || !shop.id) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-black text-white p-5 text-center">
@@ -57,7 +52,6 @@ export default async function Home({ params }: { params: Promise<{ slug: string 
 
   return (
     <main className="bg-black min-h-screen">
-      {/* 4. Renderização dos componentes com dados reais */}
       <Hero 
         title={customization?.hero_title || shop.name}
         subtitle={customization?.hero_subtitle}
@@ -76,10 +70,13 @@ export default async function Home({ params }: { params: Promise<{ slug: string 
 
       <Localizacao 
         address={shop.address}
+        endereco_texto={customization?.endereco_texto}
         mapLink={customization?.google_maps_link}
+        mapa_embed_url={customization?.mapa_embed_url}
         phone={shop.phone}
         instagram={customization?.instagram_url}
         whatsapp={customization?.whatsapp_url}
+        hours={shop.hours}
       />
 
       <ProductList slug={slug} />

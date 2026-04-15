@@ -1,16 +1,30 @@
 "use client";
 
 interface LocalizacaoProps {
-    address: string;
-    mapLink?: string;
+    address: string;          // fallback — vem do barbershop.address
+    endereco_texto?: string;  // NOVO — vem da customização (preenchido pelo AddressSearch)
+    mapLink?: string;         // fallback — campo antigo google_maps_link
+    mapa_embed_url?: string;  // NOVO — gerado automaticamente pelo Nominatim
     phone: string;
     instagram?: string;
     whatsapp?: string;
     hours?: any[];
 }
 
-const Localizacao = ({ address, mapLink, phone, instagram, whatsapp, hours }: LocalizacaoProps) => {
-    const embedUrl = mapLink || "";
+const Localizacao = ({
+    address,
+    endereco_texto,
+    mapLink,
+    mapa_embed_url,
+    phone,
+    instagram,
+    whatsapp,
+    hours
+}: LocalizacaoProps) => {
+
+    // Prioriza o novo campo, cai pro antigo se não existir
+    const embedUrl = mapa_embed_url || mapLink || "";
+    const enderecoExibido = endereco_texto || address;
 
     const getBusinessDays = () => {
         if (!hours || hours.length === 0) return "Consulte nossos horários";
@@ -26,12 +40,10 @@ const Localizacao = ({ address, mapLink, phone, instagram, whatsapp, hours }: Lo
         return "Consulte nossos horários";
     };
 
-    // Formata o link do Instagram caso venha apenas o @
     const instagramHref = instagram?.startsWith('http') 
         ? instagram 
         : `https://instagram.com/${instagram?.replace('@', '')}`;
 
-    // Limpa o número do WhatsApp (mantém apenas dígitos)
     const whatsappNumber = whatsapp?.replace(/\D/g, '');
 
     return (
@@ -43,7 +55,7 @@ const Localizacao = ({ address, mapLink, phone, instagram, whatsapp, hours }: Lo
                     </h2>
                     <div className="w-12 h-1 bg-amber-500 mx-auto mt-4 mb-6"></div>
                     <p className="text-zinc-300 max-w-md mx-auto text-sm leading-relaxed font-medium">
-                        {address}
+                        {enderecoExibido}
                     </p>
                 </div>
 

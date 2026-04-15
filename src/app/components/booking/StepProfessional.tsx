@@ -27,7 +27,7 @@ export default function StepProfessional({
           The Specialists
         </span>
         <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">
-          Escolha o <span className="text-amber-500">Mestre</span>
+          Escolha o <span className="text-amber-500">Profissional</span>
         </h2>
       </div>
       
