@@ -14,10 +14,12 @@ interface Props {
 }
 
 export function AddressSearch({ value, onChange }: Props) {
-  const [query, setQuery] = useState(value);
+  const [query, setQuery] = useState("");
+  const [numero, setNumero] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -32,9 +34,16 @@ export function AddressSearch({ value, onChange }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Atualiza o input se o valor externo mudar (ex: ao carregar dados do banco)
+  // Quando o valor externo muda (carregando do banco), separa rua e número
   useEffect(() => {
-    setQuery(value);
+    if (!value) return;
+    // Tenta separar o número se vier no formato "Rua X, 123 — ..."
+    const matchNumero = value.match(/,\s*(\d+[A-Za-z]?)\s*[,—]/);
+    if (matchNumero) {
+      setNumero(matchNumero[1]);
+    }
+    // Mostra só a parte principal no input de busca
+    setQuery(value.split(",")[0] || value);
   }, [value]);
 
   const buscarSugestoes = (texto: string) => {
@@ -61,13 +70,18 @@ export function AddressSearch({ value, onChange }: Props) {
       } finally {
         setLoading(false);
       }
-    }, 500); // espera 500ms depois que o usuário parar de digitar
+    }, 500);
   };
 
-  const handleSelect = (suggestion: Suggestion) => {
-    const endereco = suggestion.display_name;
+  // Monta o endereço final com número e dispara onChange
+  const montarEndereco = (suggestion: Suggestion, num: string) => {
+    const partes = suggestion.display_name.split(",");
+    // Pega as 3 primeiras partes (rua, bairro, cidade) pra não ficar gigante
+    const enderecoBase = partes.slice(0, 3).join(",").trim();
+    const enderecoFinal = num
+      ? `${enderecoBase}, ${num}`
+      : enderecoBase;
 
-    // Monta a URL do iframe do OpenStreetMap com as coordenadas
     const embedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${
       parseFloat(suggestion.lon) - 0.005
     },${
@@ -78,26 +92,41 @@ export function AddressSearch({ value, onChange }: Props) {
       parseFloat(suggestion.lat) + 0.005
     }&layer=mapnik&marker=${suggestion.lat},${suggestion.lon}`;
 
-    setQuery(endereco);
+    onChange(enderecoFinal, embedUrl);
+  };
+
+  const handleSelect = (suggestion: Suggestion) => {
+    setSelectedSuggestion(suggestion);
+    setQuery(suggestion.display_name.split(",")[0]); // mostra só a rua no input
     setSuggestions([]);
     setOpen(false);
-    onChange(endereco, embedUrl); // devolve os dois valores pro componente pai
+    montarEndereco(suggestion, numero);
+  };
+
+  const handleNumeroChange = (num: string) => {
+    setNumero(num);
+    if (selectedSuggestion) {
+      montarEndereco(selectedSuggestion, num);
+    }
   };
 
   return (
-    <div ref={wrapperRef} className="relative space-y-1">
+    <div ref={wrapperRef} className="space-y-2">
       <label className="text-[9px] text-zinc-400 uppercase font-black">
         Endereço da Barbearia
       </label>
+
+      {/* Campo de busca */}
       <div className="relative">
         <input
           type="text"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
+            setSelectedSuggestion(null);
             buscarSugestoes(e.target.value);
           }}
-          placeholder="Ex: Rua das Flores, 123, Fortaleza"
+          placeholder="Ex: Rua das Flores, Fortaleza"
           className="w-full bg-black border border-zinc-800 p-3 text-xs text-white rounded-lg outline-none focus:border-amber-500 pr-8"
         />
         {loading && (
@@ -105,27 +134,38 @@ export function AddressSearch({ value, onChange }: Props) {
             <div className="w-3 h-3 border border-amber-500 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
+
+        {/* Lista de sugestões */}
+        {open && suggestions.length > 0 && (
+          <ul className="absolute z-50 w-full bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden shadow-xl mt-1">
+            {suggestions.map((s) => (
+              <li
+                key={s.place_id}
+                onClick={() => handleSelect(s)}
+                className="px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white cursor-pointer border-b border-zinc-800 last:border-0 transition-colors"
+              >
+                {s.display_name}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
-      {/* Lista de sugestões */}
-      {open && suggestions.length > 0 && (
-        <ul className="absolute z-50 w-full bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden shadow-xl mt-1">
-          {suggestions.map((s) => (
-            <li
-              key={s.place_id}
-              onClick={() => handleSelect(s)}
-              className="px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white cursor-pointer border-b border-zinc-800 last:border-0 transition-colors"
-            >
-              {s.display_name}
-            </li>
-          ))}
-        </ul>
+      {/* Campo de número — só aparece depois de selecionar uma rua */}
+      {selectedSuggestion && (
+        <input
+          type="text"
+          value={numero}
+          onChange={(e) => handleNumeroChange(e.target.value)}
+          placeholder="Número (ex: 123, S/N)"
+          className="w-full bg-black border border-zinc-800 p-3 text-xs text-white rounded-lg outline-none focus:border-amber-500"
+        />
       )}
 
-      {/* Preview do endereço selecionado */}
-      {query && !open && (
+      {/* Preview do endereço final */}
+      {value && !open && (
         <p className="text-[10px] text-zinc-500 pt-1">
-          📍 {query}
+          📍 {value}
         </p>
       )}
     </div>

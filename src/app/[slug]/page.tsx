@@ -60,9 +60,10 @@ export default async function Home({ params }: { params: Promise<{ slug: string 
       />
       
       <Sobre 
-        text={customization?.about_text} 
-        shopName={shop.name}
-      />
+  text={customization?.about_text} 
+  shopName={shop.name}
+  aboutImage={customization?.about_url}  {/* estava faltando essa linha */}
+/>
 
       <Servicos slug={slug} />
 
