@@ -27,11 +27,6 @@ const Sobre = ({ text, shopName, aboutImage }: SobreProps) => {
             <div className="absolute -inset-2 border border-amber-500/20 rounded-lg translate-x-4 translate-y-4 hidden md:block group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-500"></div>
             
             <div className="relative overflow-hidden rounded-lg">
-              {/* 
-                Se for URL externa (Supabase), usa <img> normal.
-                O next/image exige configurar domínios externos no next.config.
-                Pra não travar o fluxo agora, usamos img com as mesmas classes.
-              */}
               {aboutImage ? (
                 <img
                   src={aboutImage}
