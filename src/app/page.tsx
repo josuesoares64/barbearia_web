@@ -40,7 +40,7 @@ function useInView(threshold = 0.15) {
           observer.disconnect();
         }
       },
-      { threshold }
+      { threshold },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -345,23 +345,26 @@ function DashboardImage() {
     <div
       className="relative rounded-2xl overflow-hidden border border-zinc-700/60"
       style={{
-        boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,158,11,0.06)",
+        boxShadow:
+          "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,158,11,0.06)",
         transition: "box-shadow 0.4s ease, transform 0.4s ease",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px) scale(1.01)";
+        (e.currentTarget as HTMLDivElement).style.transform =
+          "translateY(-4px) scale(1.01)";
         (e.currentTarget as HTMLDivElement).style.boxShadow =
           "0 60px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(245,158,11,0.15)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0) scale(1)";
+        (e.currentTarget as HTMLDivElement).style.transform =
+          "translateY(0) scale(1)";
         (e.currentTarget as HTMLDivElement).style.boxShadow =
           "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,158,11,0.06)";
       }}
     >
       <Image
         src="/tela-dashboard.png"
-        alt="Dashboard do Scheduly"
+        alt="Dashboard do Vynce"
         width={1280}
         height={720}
         className="w-full h-auto"
@@ -491,9 +494,7 @@ export default function LandingPage() {
           className="fixed w-full z-50 border-b"
           style={{
             top: "40px",
-            background: navScrolled
-              ? "rgba(0,0,0,0.92)"
-              : "rgba(0,0,0,0.4)",
+            background: navScrolled ? "rgba(0,0,0,0.92)" : "rgba(0,0,0,0.4)",
             borderColor: navScrolled
               ? "rgba(39,39,42,0.8)"
               : "rgba(39,39,42,0.3)",
@@ -505,19 +506,24 @@ export default function LandingPage() {
             <div className="flex items-center gap-2.5 group cursor-pointer">
               <div
                 className="w-9 h-9 bg-amber-500 rounded-lg flex items-center justify-center"
-                style={{ transition: "transform 0.3s ease, box-shadow 0.3s ease" }}
+                style={{
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.transform = "scale(1.1) rotate(-5deg)";
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = "0 0 20px rgba(245,158,11,0.4)";
+                  (e.currentTarget as HTMLDivElement).style.transform =
+                    "scale(1.1) rotate(-5deg)";
+                  (e.currentTarget as HTMLDivElement).style.boxShadow =
+                    "0 0 20px rgba(245,158,11,0.4)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.transform = "scale(1) rotate(0deg)";
+                  (e.currentTarget as HTMLDivElement).style.transform =
+                    "scale(1) rotate(0deg)";
                   (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
                 }}
               >
                 <FiCalendar className="text-white w-5 h-5" />
               </div>
-              <span className="text-xl font-black tracking-tight">Scheduly</span>
+              <span className="text-xl font-black tracking-tight">Vynce</span>
             </div>
             <div className="hidden md:flex items-center gap-10 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
               {[
@@ -531,7 +537,8 @@ export default function LandingPage() {
                   className="relative group"
                   style={{ transition: "color 0.2s ease" }}
                   onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLAnchorElement).style.color = "#f59e0b")
+                    ((e.currentTarget as HTMLAnchorElement).style.color =
+                      "#f59e0b")
                   }
                   onMouseLeave={(e) =>
                     ((e.currentTarget as HTMLAnchorElement).style.color = "")
@@ -545,7 +552,8 @@ export default function LandingPage() {
                       transition: "width 0.3s ease",
                     }}
                     onMouseEnter={(e) =>
-                      ((e.currentTarget as HTMLSpanElement).style.width = "100%")
+                      ((e.currentTarget as HTMLSpanElement).style.width =
+                        "100%")
                     }
                   />
                 </a>
@@ -553,16 +561,25 @@ export default function LandingPage() {
               <Link
                 href="/login"
                 className="bg-amber-500 text-white px-6 py-3 rounded-full font-black uppercase text-[10px] tracking-widest"
-                style={{ transition: "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease" }}
+                style={{
+                  transition:
+                    "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+                }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.background = "#fbbf24";
-                  (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.04)";
-                  (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 0 20px rgba(245,158,11,0.35)";
+                  (e.currentTarget as HTMLAnchorElement).style.background =
+                    "#fbbf24";
+                  (e.currentTarget as HTMLAnchorElement).style.transform =
+                    "scale(1.04)";
+                  (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                    "0 0 20px rgba(245,158,11,0.35)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.background = "#f59e0b";
-                  (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
-                  (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none";
+                  (e.currentTarget as HTMLAnchorElement).style.background =
+                    "#f59e0b";
+                  (e.currentTarget as HTMLAnchorElement).style.transform =
+                    "scale(1)";
+                  (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                    "none";
                 }}
               >
                 Entrar
@@ -578,7 +595,8 @@ export default function LandingPage() {
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full -z-10"
           style={{
-            background: "radial-gradient(ellipse, rgba(245,158,11,0.10) 0%, transparent 70%)",
+            background:
+              "radial-gradient(ellipse, rgba(245,158,11,0.10) 0%, transparent 70%)",
             animation: "pulse-glow 4s ease-in-out infinite",
           }}
         />
@@ -599,7 +617,10 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto text-center">
           {/* Badge */}
           <div className="animate-hero-1 inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/20 rounded-full px-4 py-2 text-amber-500 text-[10px] font-black uppercase tracking-widest mb-8">
-            <FiZap className="w-3 h-3" style={{ animation: "badge-bounce 1.5s ease-in-out infinite" }} />
+            <FiZap
+              className="w-3 h-3"
+              style={{ animation: "badge-bounce 1.5s ease-in-out infinite" }}
+            />
             15 dias grátis · Sem burocracia
           </div>
 
@@ -623,7 +644,8 @@ export default function LandingPage() {
                 key={i}
                 className="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 text-[11px] font-bold px-3 py-1.5 rounded-full"
                 style={{
-                  transition: "border-color 0.2s ease, color 0.2s ease, transform 0.2s ease",
+                  transition:
+                    "border-color 0.2s ease, color 0.2s ease, transform 0.2s ease",
                   animationDelay: `${i * 80}ms`,
                 }}
                 onMouseEnter={(e) => {
@@ -650,7 +672,8 @@ export default function LandingPage() {
               href="/cadastrar"
               className="w-full sm:w-auto bg-amber-500 text-white font-black px-12 py-5 rounded-2xl uppercase text-xs flex items-center justify-center gap-3"
               style={{
-                transition: "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+                transition:
+                  "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
                 boxShadow: "0 0 0 rgba(245,158,11,0)",
               }}
               onMouseEnter={(e) => {
@@ -671,7 +694,10 @@ export default function LandingPage() {
             <a
               href="#como-funciona"
               className="w-full sm:w-auto bg-zinc-900 border border-zinc-800 text-white font-black px-12 py-5 rounded-2xl uppercase text-xs flex items-center justify-center gap-2"
-              style={{ transition: "background 0.2s ease, border-color 0.2s ease, transform 0.2s ease" }}
+              style={{
+                transition:
+                  "background 0.2s ease, border-color 0.2s ease, transform 0.2s ease",
+              }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLAnchorElement;
                 el.style.background = "rgb(39,39,42)";
@@ -692,13 +718,17 @@ export default function LandingPage() {
           {/* Scroll indicator */}
           <div
             className="animate-hero-6 mt-16 flex flex-col items-center gap-2 text-zinc-600"
-            style={{ animation: "hero-in 0.9s cubic-bezier(0.22,1,0.36,1) 0.85s both" }}
+            style={{
+              animation: "hero-in 0.9s cubic-bezier(0.22,1,0.36,1) 0.85s both",
+            }}
           >
             <div
               className="w-px h-10 bg-gradient-to-b from-transparent to-zinc-700"
               style={{ animation: "float 2s ease-in-out infinite" }}
             />
-            <span className="text-[9px] uppercase tracking-widest font-black">scroll</span>
+            <span className="text-[9px] uppercase tracking-widest font-black">
+              scroll
+            </span>
           </div>
         </div>
       </section>
@@ -706,18 +736,39 @@ export default function LandingPage() {
       {/* ── SOCIAL PROOF BAR ── */}
       <section className="py-8 px-6 border-y border-zinc-900 bg-zinc-900/30 overflow-hidden">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16">
-          <StatCounter value={300} prefix="+" label="Negócios ativos" accent delay={0} />
+          <StatCounter
+            value={300}
+            prefix="+"
+            label="Negócios ativos"
+            accent
+            delay={0}
+          />
           <div className="hidden sm:block w-px h-10 bg-zinc-800" />
           <FadeUp delay={100} className="text-center">
-            <p className="text-3xl font-black tracking-tighter text-white">Multi-tenant</p>
-            <p className="text-zinc-500 text-[10px] uppercase font-black tracking-widest mt-1">Dados 100% isolados</p>
+            <p className="text-3xl font-black tracking-tighter text-white">
+              Multi-tenant
+            </p>
+            <p className="text-zinc-500 text-[10px] uppercase font-black tracking-widest mt-1">
+              Dados 100% isolados
+            </p>
           </FadeUp>
           <div className="hidden sm:block w-px h-10 bg-zinc-800" />
-          <StatCounter value={15000} prefix="+" suffix="/mês" label="Agendamentos/mês" accent delay={150} />
+          <StatCounter
+            value={15000}
+            prefix="+"
+            suffix="/mês"
+            label="Agendamentos/mês"
+            accent
+            delay={150}
+          />
           <div className="hidden sm:block w-px h-10 bg-zinc-800" />
           <FadeUp delay={200} className="text-center">
-            <p className="text-3xl font-black tracking-tighter text-white">15 dias</p>
-            <p className="text-zinc-500 text-[10px] uppercase font-black tracking-widest mt-1">Grátis pra testar</p>
+            <p className="text-3xl font-black tracking-tighter text-white">
+              15 dias
+            </p>
+            <p className="text-zinc-500 text-[10px] uppercase font-black tracking-widest mt-1">
+              Grátis pra testar
+            </p>
           </FadeUp>
         </div>
       </section>
@@ -741,7 +792,8 @@ export default function LandingPage() {
                 <div
                   className="bg-zinc-900/20 border border-zinc-800 p-8 rounded-3xl h-full"
                   style={{
-                    transition: "border-color 0.3s ease, transform 0.3s ease, background 0.3s ease",
+                    transition:
+                      "border-color 0.3s ease, transform 0.3s ease, background 0.3s ease",
                   }}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget as HTMLDivElement;
@@ -758,12 +810,18 @@ export default function LandingPage() {
                 >
                   <div
                     className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mb-6 text-red-400"
-                    style={{ transition: "transform 0.3s ease, background 0.3s ease" }}
+                    style={{
+                      transition: "transform 0.3s ease, background 0.3s ease",
+                    }}
                   >
                     {p.icon}
                   </div>
-                  <h4 className="text-lg font-black uppercase mb-3 tracking-tight">{p.title}</h4>
-                  <p className="text-zinc-500 text-sm leading-relaxed">{p.desc}</p>
+                  <h4 className="text-lg font-black uppercase mb-3 tracking-tight">
+                    {p.title}
+                  </h4>
+                  <p className="text-zinc-500 text-sm leading-relaxed">
+                    {p.desc}
+                  </p>
                 </div>
               </FadeUp>
             ))}
@@ -809,7 +867,8 @@ export default function LandingPage() {
                 <div
                   className="bg-zinc-900/40 border border-zinc-800 p-8 rounded-3xl h-full"
                   style={{
-                    transition: "border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
+                    transition:
+                      "border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
                   }}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget as HTMLDivElement;
@@ -826,14 +885,18 @@ export default function LandingPage() {
                 >
                   <div
                     className="w-12 h-12 bg-amber-400/10 rounded-xl flex items-center justify-center mb-6"
-                    style={{ transition: "background 0.3s ease, transform 0.3s ease" }}
+                    style={{
+                      transition: "background 0.3s ease, transform 0.3s ease",
+                    }}
                   >
                     {card.icon}
                   </div>
                   <h4 className="text-xl font-black uppercase mb-4 tracking-tight">
                     {card.title}
                   </h4>
-                  <p className="text-zinc-500 text-sm leading-relaxed">{card.desc}</p>
+                  <p className="text-zinc-500 text-sm leading-relaxed">
+                    {card.desc}
+                  </p>
                 </div>
               </FadeUp>
             ))}
@@ -849,8 +912,7 @@ export default function LandingPage() {
           </FadeIn>
           <FadeUp delay={200} className="flex-1">
             <h3 className="text-4xl font-black tracking-tighter mb-6">
-              Dashboard{" "}
-              <span className="text-amber-500">poderoso.</span>
+              Dashboard <span className="text-amber-500">poderoso.</span>
             </h3>
             <p className="text-zinc-400 leading-relaxed mb-8">
               O dono visualiza faturamento total, ocupação por profissional e
@@ -882,7 +944,9 @@ export default function LandingPage() {
                 >
                   <span
                     className="text-amber-500 shrink-0 w-9 h-9 bg-amber-500/10 rounded-lg flex items-center justify-center"
-                    style={{ transition: "transform 0.2s ease, background 0.2s ease" }}
+                    style={{
+                      transition: "transform 0.2s ease, background 0.2s ease",
+                    }}
                   >
                     {item.icon}
                   </span>
@@ -898,8 +962,7 @@ export default function LandingPage() {
       <section className="py-24 px-6 border-t border-zinc-900 bg-zinc-900/20">
         <FadeUp className="max-w-4xl mx-auto text-center mb-20">
           <h3 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">
-            Agenda com{" "}
-            <span className="text-amber-500">cérebro.</span>
+            Agenda com <span className="text-amber-500">cérebro.</span>
           </h3>
           <p className="text-zinc-500 text-lg leading-relaxed">
             Nada de horários encavalados. O sistema calcula o tempo do serviço
@@ -926,7 +989,8 @@ export default function LandingPage() {
               <div
                 className="bg-zinc-900/30 border border-zinc-800 p-10 rounded-3xl h-full"
                 style={{
-                  transition: "border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
+                  transition:
+                    "border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLDivElement;
@@ -942,8 +1006,12 @@ export default function LandingPage() {
                 }}
               >
                 {card.icon}
-                <h4 className="text-2xl font-black uppercase mb-4">{card.title}</h4>
-                <p className="text-zinc-500 text-sm leading-relaxed">{card.desc}</p>
+                <h4 className="text-2xl font-black uppercase mb-4">
+                  {card.title}
+                </h4>
+                <p className="text-zinc-500 text-sm leading-relaxed">
+                  {card.desc}
+                </p>
               </div>
             </FadeUp>
           ))}
@@ -958,8 +1026,7 @@ export default function LandingPage() {
               Planos
             </h2>
             <h3 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">
-              Simples e{" "}
-              <span className="text-amber-500">transparente.</span>
+              Simples e <span className="text-amber-500">transparente.</span>
             </h3>
             <p className="text-zinc-500 text-sm">
               Pagamento manual · Sem cartão de crédito · 15 dias grátis
@@ -998,7 +1065,8 @@ export default function LandingPage() {
                       : "bg-zinc-900/30 border-zinc-800 text-white"
                   }`}
                   style={{
-                    transition: "transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease",
+                    transition:
+                      "transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease",
                     boxShadow: plan.highlight
                       ? "0 20px 60px rgba(245,158,11,0.2)"
                       : "none",
@@ -1009,7 +1077,8 @@ export default function LandingPage() {
                     el.style.boxShadow = plan.highlight
                       ? "0 30px 80px rgba(245,158,11,0.35)"
                       : "0 20px 60px rgba(245,158,11,0.08)";
-                    if (!plan.highlight) el.style.borderColor = "rgba(113,113,122,0.6)";
+                    if (!plan.highlight)
+                      el.style.borderColor = "rgba(113,113,122,0.6)";
                   }}
                   onMouseLeave={(e) => {
                     const el = e.currentTarget as HTMLDivElement;
@@ -1021,7 +1090,7 @@ export default function LandingPage() {
                   }}
                 >
                   {plan.highlight && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-black text-amber-500 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-amber-400/30 whitespace-nowrap">
+                    <div className="absolute -top-6 left-1/2 pt-12 -translate-x-1/2 bg-black text-amber-500 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-amber-400/30 whitespace-nowrap">
                       Mais popular
                     </div>
                   )}
@@ -1029,10 +1098,10 @@ export default function LandingPage() {
                   {/* Promo badge */}
                   <div className="absolute -top-3 right-4 promo-badge">
                     <div
-                      className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
+                      className={`relative rounded-3xl p-8 border flex flex-col card-shine ${
                         plan.highlight
-                          ? "bg-black text-amber-400 border border-amber-400/40"
-                          : "bg-amber-500 text-white"
+                          ? "bg-amber-500 border-amber-400 text-black md:-mt-4 pt-12"
+                          : "bg-zinc-900/30 border-zinc-800 text-white"
                       }`}
                     >
                       50% off
@@ -1102,10 +1171,12 @@ export default function LandingPage() {
                           transition: "transform 0.2s ease",
                         }}
                         onMouseEnter={(e) =>
-                          ((e.currentTarget as HTMLLIElement).style.transform = "translateX(4px)")
+                          ((e.currentTarget as HTMLLIElement).style.transform =
+                            "translateX(4px)")
                         }
                         onMouseLeave={(e) =>
-                          ((e.currentTarget as HTMLLIElement).style.transform = "")
+                          ((e.currentTarget as HTMLLIElement).style.transform =
+                            "")
                         }
                       >
                         <FiCheck
@@ -1120,9 +1191,7 @@ export default function LandingPage() {
                       <li
                         key={`no-${j}`}
                         className={`flex items-center gap-3 text-sm line-through ${
-                          plan.highlight
-                            ? "text-amber-300/40"
-                            : "text-zinc-600"
+                          plan.highlight ? "text-amber-300/40" : "text-zinc-600"
                         }`}
                       >
                         <FiX className="shrink-0 w-4 h-4 opacity-30" />
@@ -1139,7 +1208,8 @@ export default function LandingPage() {
                         : "bg-amber-500 text-white"
                     }`}
                     style={{
-                      transition: "transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease",
+                      transition:
+                        "transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease",
                     }}
                     onMouseEnter={(e) => {
                       const el = e.currentTarget as HTMLAnchorElement;
@@ -1165,8 +1235,9 @@ export default function LandingPage() {
           {/* Nota sobre preço futuro */}
           <FadeUp delay={400} className="mt-8 text-center">
             <p className="text-zinc-600 text-xs font-bold uppercase tracking-wider">
-              ⚠️ Os preços promocionais são válidos apenas durante o período de lançamento.
-              Ao atingir os primeiros clientes, os valores retornam ao normal.
+              ⚠️ Os preços promocionais são válidos apenas durante o período de
+              lançamento. Ao atingir os primeiros clientes, os valores retornam
+              ao normal.
             </p>
           </FadeUp>
         </div>
@@ -1183,8 +1254,7 @@ export default function LandingPage() {
               Dúvidas
             </h2>
             <h3 className="text-4xl md:text-5xl font-black tracking-tighter">
-              Perguntas{" "}
-              <span className="text-amber-500">frequentes.</span>
+              Perguntas <span className="text-amber-500">frequentes.</span>
             </h3>
           </FadeUp>
           <div className="space-y-3">
@@ -1206,7 +1276,8 @@ export default function LandingPage() {
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full -z-10"
           style={{
-            background: "radial-gradient(ellipse, rgba(245,158,11,0.12), transparent 70%)",
+            background:
+              "radial-gradient(ellipse, rgba(245,158,11,0.12), transparent 70%)",
             animation: "pulse-glow 4s ease-in-out 1s infinite",
           }}
         />
@@ -1223,7 +1294,8 @@ export default function LandingPage() {
             href="/cadastrar"
             className="inline-flex items-center gap-3 bg-amber-500 text-white font-black px-16 py-6 rounded-2xl uppercase text-sm"
             style={{
-              transition: "transform 0.25s ease, box-shadow 0.25s ease, background 0.2s ease",
+              transition:
+                "transform 0.25s ease, box-shadow 0.25s ease, background 0.2s ease",
               boxShadow: "0 20px 50px rgba(245,158,11,0.2)",
             }}
             onMouseEnter={(e) => {
@@ -1252,7 +1324,8 @@ export default function LandingPage() {
               className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center"
               style={{ transition: "transform 0.3s ease" }}
               onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLDivElement).style.transform = "rotate(-10deg) scale(1.1)")
+                ((e.currentTarget as HTMLDivElement).style.transform =
+                  "rotate(-10deg) scale(1.1)")
               }
               onMouseLeave={(e) =>
                 ((e.currentTarget as HTMLDivElement).style.transform = "")
@@ -1261,7 +1334,7 @@ export default function LandingPage() {
               <FiCalendar className="text-white w-4 h-4" />
             </div>
             <span className="text-base font-black tracking-tight text-white">
-              Scheduly
+              Vynce
             </span>
           </div>
           <p className="text-[10px] font-black uppercase tracking-widest">

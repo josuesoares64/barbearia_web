@@ -50,6 +50,20 @@ export default async function Home({ params }: { params: Promise<{ slug: string 
     );
   }
 
+  if (!["pro", "premium"].includes(shop.plan || "trial")) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-black text-white p-5 text-center">
+        <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6">
+          <span className="text-3xl">🔒</span>
+        </div>
+        <h1 className="text-2xl font-black uppercase mb-2">Página não disponível</h1>
+        <p className="text-zinc-500 text-sm max-w-xs">
+          Esta página pública ainda não foi ativada. Entre em contato com o estabelecimento.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <main className="bg-black min-h-screen">
       <Hero 
@@ -59,11 +73,11 @@ export default async function Home({ params }: { params: Promise<{ slug: string 
         slug={slug}
       />
       
-<Sobre 
-  text={customization?.about_text} 
-  shopName={shop.name}
-  aboutImage={customization?.about_url}
-/>
+      <Sobre 
+        text={customization?.about_text} 
+        shopName={shop.name}
+        aboutImage={customization?.about_url}
+      />
 
       <Servicos slug={slug} />
 

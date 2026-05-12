@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HourSlot {
   id: string;
@@ -13,35 +15,25 @@ const WEEKDAYS = [
   "Quinta-feira", "Sexta-feira", "Sábado"
 ];
 
-export function HoursManager({ slug, token }: { slug: string; token: string }) {
+export function HoursManager({ slug }: { slug: string }) {
+  const { user } = useAuth();
+
   const [hours, setHours] = useState<HourSlot[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
   const [formData, setFormData] = useState({
     weekday: "1",
     open_time: "08:00",
     close_time: "18:00"
   });
 
-  useEffect(() => {
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setIsOwner(payload.role?.toLowerCase() === "dono");
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, [token]);
+  const isOwner = user?.role?.toLowerCase() === "dono";
 
   useEffect(() => {
     if (slug) fetchHours();
   }, [slug]);
 
   const fetchHours = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/hours`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/hours`);
     if (response.ok) {
       const data = await response.json();
       setHours(data.sort((a: any, b: any) => a.weekday - b.weekday || a.open_time.localeCompare(b.open_time)));
@@ -51,28 +43,26 @@ export function HoursManager({ slug, token }: { slug: string; token: string }) {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/hours`, {
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/hours`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         weekday: parseInt(formData.weekday),
         open_time: formData.open_time,
         close_time: formData.close_time
       }),
     });
-    if (response.ok) {
-      fetchHours();
-    } else {
+    if (!response.ok) {
       alert("Erro ao salvar horário. Verifique se não há conflito.");
+    } else {
+      fetchHours();
     }
     setLoading(false);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Remover este turno de atendimento?")) return;
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/hours/${id}`, {
+    await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/hours/${id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
     });
     fetchHours();
   };

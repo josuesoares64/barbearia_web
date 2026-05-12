@@ -1,13 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { PlanGate } from "@/app/components/PlanGate";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function ProductForm({ slug, token }: { slug: string; token: string }) {
-  const [isOpen, setIsOpen] = useState(false);
+export function ProductForm({ slug }: { slug: string }) {
+  const { user } = useAuth();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const [isOwner, setIsOwner] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -18,18 +20,8 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  /* ===============================
-     PERMISSÃO
-  =============================== */
-  useEffect(() => {
-    if (!token) return;
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setIsOwner(payload.role?.toLowerCase() === "dono");
-    } catch (err) {
-      console.error(err);
-    }
-  }, [token]);
+  const isOwner = user?.role?.toLowerCase() === "dono";
+  const planoAtual = (user?.plan || "trial") as "trial" | "starter" | "pro" | "premium";
 
   /* ===============================
      BUSCAR PRODUTOS
@@ -39,9 +31,8 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
   }, [slug]);
 
   const fetchProducts = async () => {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products`,
-      { headers: { Authorization: `Bearer ${token}` } }
+    const res = await fetchWithAuth(
+      `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products`
     );
     if (res.ok) setProducts(await res.json());
   };
@@ -51,6 +42,7 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
   =============================== */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isOwner) return;
     setLoading(true);
 
     try {
@@ -66,12 +58,8 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
           ? `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products/${editingId}`
           : `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products`;
 
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method: isEditing ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify(payload),
       });
 
@@ -91,12 +79,9 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
     if (!confirm("Excluir este produto?")) return;
     setDeletingId(id);
 
-    await fetch(
+    await fetchWithAuth(
       `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/products/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      }
+      { method: "DELETE" }
     );
 
     fetchProducts();
@@ -126,62 +111,49 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
      UI
   =============================== */
   return (
-    <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4">
-
-      {/* CONTEÚDO EXPANSÍVEL – APENAS DONO */}
+    <PlanGate planoAtual={planoAtual} planoNecessario="pro">
+      <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4">
         <div className="mt-4 pt-4 border-t border-zinc-800 space-y-6">
 
-          {/* FORM */}
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-3 gap-3"
-          >
-            <input
-              type="text"
-              placeholder="Nome"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Preço"
-              value={formData.price}
-              onChange={(e) =>
-                setFormData({ ...formData, price: e.target.value })
-              }
-              className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Estoque"
-              value={formData.stock_quantity}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  stock_quantity: e.target.value,
-                })
-              }
-              className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
-              required
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="md:col-span-3 bg-amber-500 text-black text-[10px] font-black py-2.5 rounded uppercase"
+          {/* FORM — só dono pode adicionar/editar */}
+          {isOwner && (
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 md:grid-cols-3 gap-3"
             >
-              {loading
-                ? "Processando..."
-                : isEditing
-                ? "Atualizar Produto"
-                : "Adicionar Produto"}
-            </button>
-          </form>
+              <input
+                type="text"
+                placeholder="Nome"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
+                required
+              />
+              <input
+                type="text"
+                placeholder="Preço"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
+                required
+              />
+              <input
+                type="number"
+                placeholder="Estoque"
+                value={formData.stock_quantity}
+                onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                className="bg-black border border-zinc-700 rounded p-2 text-xs text-white"
+                required
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="md:col-span-3 bg-amber-500 text-black text-[10px] font-black py-2.5 rounded uppercase"
+              >
+                {loading ? "Processando..." : isEditing ? "Atualizar Produto" : "Adicionar Produto"}
+              </button>
+            </form>
+          )}
 
           {/* LISTA */}
           <div className="grid gap-2">
@@ -197,33 +169,32 @@ export function ProductForm({ slug, token }: { slug: string; token: string }) {
                   </p>
                 </div>
 
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => handleEdit(p)}
-                    className="text-amber-500 uppercase font-bold text-[10px]"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(p.id)}
-                    className="text-red-500 uppercase font-bold text-[10px]"
-                  >
-                    {deletingId === p.id ? "..." : "Excluir"}
-                  </button>
-                </div>
+                {isOwner && (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleEdit(p)}
+                      className="text-amber-500 uppercase font-bold text-[10px]"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="text-red-500 uppercase font-bold text-[10px]"
+                    >
+                      {deletingId === p.id ? "..." : "Excluir"}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
 
         </div>
-
-    </div>
+      </div>
+    </PlanGate>
   );
 }
 
-/* ===============================
-   TYPES
-=============================== */
 interface Product {
   id: string;
   name: string;

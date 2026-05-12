@@ -1,7 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { PlanGate } from "@/app/components/PlanGate";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function ServiceManager({ slug, token }: { slug: string; token: string }) {
+export function ServiceManager({ slug }: { slug: string }) {
+  const { user } = useAuth();
+
   const [activeTab, setActiveTab] = useState<TabType>("services");
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -17,21 +22,14 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   const [isCreatingBarber, setIsCreatingBarber] = useState(false);
   const [barberFormData, setBarberFormData] = useState({ username: "", email: "", password: "", role: "Barbeiro" });
   const [togglingBarberId, setTogglingBarberId] = useState<string | null>(null);
-  const [isOwner, setIsOwner] = useState(false);
   const [blockedTimes, setBlockedTimes] = useState<any[]>([]);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [blockFormData, setBlockFormData] = useState({
     barber_id: "", date: "", start_time: "08:00", end_time: "19:00", is_full_day: true
   });
 
-  useEffect(() => {
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setIsOwner(payload.role?.toLowerCase() === "dono");
-      } catch (e) { console.error(e); }
-    }
-  }, [token]);
+  const isOwner = user?.role?.toLowerCase() === "dono";
+  const planoAtual = (user?.plan || "trial") as "trial" | "starter" | "pro" | "premium";
 
   useEffect(() => {
     if (slug) {
@@ -48,9 +46,7 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   }, [selectedBarber, activeTab]);
 
   const fetchServices = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/services`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/services`);
     if (response.ok) setServices(await response.json());
   };
 
@@ -68,9 +64,8 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
         ? `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/services/${editingId}`
         : `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/services`;
 
-      const response = await fetch(url, {
+      const response = await fetchWithAuth(url, {
         method: isEditing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
       if (response.ok) {
@@ -83,8 +78,8 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza?")) return;
     setDeletingId(id);
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/services/${id}`, {
-      method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+    await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/services/${id}`, {
+      method: "DELETE",
     });
     fetchServices();
     setDeletingId(null);
@@ -103,9 +98,7 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   };
 
   const fetchBarbersAndOwners = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers?include_inactive=true`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers?include_inactive=true`);
     if (response.ok) {
       const data = await response.json();
       setBarbers(data.filter((u: any) => u.role.toLowerCase() === "barbeiro" || u.role.toLowerCase() === "dono"));
@@ -115,9 +108,8 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   const handleCreateBarber = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCreatingBarber(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers`, {
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(barberFormData),
     });
     if (response.ok) {
@@ -131,9 +123,8 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
     if (!confirm(`Deseja realmente ${currentStatus ? "demitir" : "reativar"} este profissional?`)) return;
     setTogglingBarberId(barberId);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${barberId}`, {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${barberId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ is_active: !currentStatus }),
       });
       if (response.ok) {
@@ -147,17 +138,14 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
   };
 
   const fetchBarberServices = async (id: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barberservices/barbers/${id}/services`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barberservices/barbers/${id}/services`);
     if (response.ok) setBarberServices(await response.json());
   };
 
   const assignService = async (serviceId: string) => {
     setAssigningService(serviceId);
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barberservices/`, {
+    await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barberservices/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ barber_id: selectedBarber, service_id: serviceId }),
     });
     fetchBarberServices(selectedBarber);
@@ -166,8 +154,8 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
 
   const removeService = async (bsId: string) => {
     setUnassigningId(bsId);
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barberservices/${bsId}`, {
-      method: "DELETE", headers: { Authorization: `Bearer ${token}` }
+    await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barberservices/${bsId}`, {
+      method: "DELETE",
     });
     fetchBarberServices(selectedBarber);
     setUnassigningId(null);
@@ -175,9 +163,7 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
 
   const fetchBlockedTimes = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times`);
       if (res.ok) setBlockedTimes(await res.json());
     } catch (error) {
       console.error("Erro ao carregar bloqueios:", error);
@@ -199,27 +185,24 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
     };
     try {
       if (editingBlockId) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times/${editingBlockId}`, {
+        await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times/${editingBlockId}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload),
         });
       } else if (blockFormData.barber_id === "ALL") {
         await Promise.all(
           barbers.map(b =>
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${b.id}/blocked-times`, {
+            fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${b.id}/blocked-times`, {
               method: "POST",
-              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
               body: JSON.stringify(payload),
             })
           )
         );
       } else {
-        const response = await fetch(
+        const response = await fetchWithAuth(
           `${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/barbers/${blockFormData.barber_id}/blocked-times`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify(payload),
           }
         );
@@ -271,51 +254,53 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
       )}
 
       {activeTab === "assignments" && (
-        <div className="space-y-6">
-          <form onSubmit={handleCreateBarber} className="bg-zinc-800/20 p-4 rounded border border-zinc-800 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input type="text" placeholder="Nome" value={barberFormData.username} onChange={e => setBarberFormData({...barberFormData, username: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white" />
-            <input type="email" placeholder="Email" value={barberFormData.email} onChange={e => setBarberFormData({...barberFormData, email: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white" />
-            <input type="password" placeholder="Senha" value={barberFormData.password} onChange={e => setBarberFormData({...barberFormData, password: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white" />
-            <button type="submit" disabled={isCreatingBarber} className="bg-amber-500 text-black text-[10px] font-black py-2 rounded uppercase">{isCreatingBarber ? "..." : "Cadastrar"}</button>
-          </form>
-          <div className="space-y-2">
-            {barbers.map(b => (
-              <div key={b.id} className={`p-3 rounded border ${selectedBarber === b.id ? 'border-amber-500 bg-amber-500/5' : 'border-zinc-800 bg-black/40'}`}>
-                <div className="flex justify-between items-center">
-                  <span className="text-white text-xs font-bold uppercase">{b.username} {!b.is_active && <span className="text-red-500 text-[8px]">(Inativo)</span>}</span>
-                  <div className="flex gap-4">
-                    <button onClick={() => handleToggleBarberStatus(b.id, b.is_active)} className="text-zinc-500 text-[10px] font-bold uppercase hover:text-red-500">
-                      {togglingBarberId === b.id ? "..." : (b.is_active ? "Demitir" : "Reativar")}
-                    </button>
-                    <button onClick={() => setSelectedBarber(b.id)} className="text-amber-500 text-[10px] font-bold uppercase">Selecionar</button>
+        <PlanGate planoAtual={planoAtual} planoNecessario="starter">
+          <div className="space-y-6">
+            <form onSubmit={handleCreateBarber} className="bg-zinc-800/20 p-4 rounded border border-zinc-800 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input type="text" placeholder="Nome" value={barberFormData.username} onChange={e => setBarberFormData({...barberFormData, username: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white" />
+              <input type="email" placeholder="Email" value={barberFormData.email} onChange={e => setBarberFormData({...barberFormData, email: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white" />
+              <input type="password" placeholder="Senha" value={barberFormData.password} onChange={e => setBarberFormData({...barberFormData, password: e.target.value})} className="bg-black border border-zinc-700 p-2 text-xs text-white" />
+              <button type="submit" disabled={isCreatingBarber} className="bg-amber-500 text-black text-[10px] font-black py-2 rounded uppercase">{isCreatingBarber ? "..." : "Cadastrar"}</button>
+            </form>
+            <div className="space-y-2">
+              {barbers.map(b => (
+                <div key={b.id} className={`p-3 rounded border ${selectedBarber === b.id ? 'border-amber-500 bg-amber-500/5' : 'border-zinc-800 bg-black/40'}`}>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white text-xs font-bold uppercase">{b.username} {!b.is_active && <span className="text-red-500 text-[8px]">(Inativo)</span>}</span>
+                    <div className="flex gap-4">
+                      <button onClick={() => handleToggleBarberStatus(b.id, b.is_active)} className="text-zinc-500 text-[10px] font-bold uppercase hover:text-red-500">
+                        {togglingBarberId === b.id ? "..." : (b.is_active ? "Demitir" : "Reativar")}
+                      </button>
+                      <button onClick={() => setSelectedBarber(b.id)} className="text-amber-500 text-[10px] font-bold uppercase">Selecionar</button>
+                    </div>
                   </div>
+                  {selectedBarber === b.id && (
+                    <div className="mt-4 pt-4 border-t border-zinc-800 grid md:grid-cols-2 gap-4">
+                      <div>
+                        <h5 className="text-amber-500 text-[9px] font-bold uppercase mb-2">Serviços Atuais</h5>
+                        {barberServices.map(bs => (
+                          <div key={bs.id} className="flex justify-between text-white text-[10px] bg-black/20 p-2 mb-1 rounded">
+                            <span>{services.find(s => s.id === bs.service_id)?.name}</span>
+                            <button onClick={() => removeService(bs.id)} className="text-red-500 uppercase">{unassigningId === bs.id ? "..." : "Remover"}</button>
+                          </div>
+                        ))}
+                      </div>
+                      <div>
+                        <h5 className="text-amber-500 text-[9px] font-bold uppercase mb-2">Adicionar</h5>
+                        {services.filter(s => !barberServices.some(bs => bs.service_id === s.id)).map(s => (
+                          <div key={s.id} className="flex justify-between text-white text-[10px] bg-black/20 p-2 mb-1 rounded">
+                            <span>{s.name}</span>
+                            <button onClick={() => assignService(s.id)} className="text-amber-500 uppercase">{assigningService === s.id ? "..." : "Vincular"}</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {selectedBarber === b.id && (
-                  <div className="mt-4 pt-4 border-t border-zinc-800 grid md:grid-cols-2 gap-4">
-                    <div>
-                      <h5 className="text-amber-500 text-[9px] font-bold uppercase mb-2">Serviços Atuais</h5>
-                      {barberServices.map(bs => (
-                        <div key={bs.id} className="flex justify-between text-white text-[10px] bg-black/20 p-2 mb-1 rounded">
-                          <span>{services.find(s => s.id === bs.service_id)?.name}</span>
-                          <button onClick={() => removeService(bs.id)} className="text-red-500 uppercase">{unassigningId === bs.id ? "..." : "Remover"}</button>
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <h5 className="text-amber-500 text-[9px] font-bold uppercase mb-2">Adicionar</h5>
-                      {services.filter(s => !barberServices.some(bs => bs.service_id === s.id)).map(s => (
-                        <div key={s.id} className="flex justify-between text-white text-[10px] bg-black/20 p-2 mb-1 rounded">
-                          <span>{s.name}</span>
-                          <button onClick={() => assignService(s.id)} className="text-amber-500 uppercase">{assigningService === s.id ? "..." : "Vincular"}</button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </PlanGate>
       )}
 
       {activeTab === "offtimes" && (
@@ -376,9 +361,8 @@ export function ServiceManager({ slug, token }: { slug: string; token: string })
                       <button
                         onClick={async () => {
                           if (!confirm("Remover bloqueio?")) return;
-                          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times/${block.id}`, {
+                          await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/barbershops/${slug}/blocked-times/${block.id}`, {
                             method: 'DELETE',
-                            headers: { Authorization: `Bearer ${token}` }
                           });
                           fetchBlockedTimes();
                         }}
