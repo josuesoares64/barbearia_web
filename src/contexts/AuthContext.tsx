@@ -10,6 +10,7 @@ interface User {
   email: string;
   role: string;
   slug: string;
+  plan: string;
 }
 
 interface AuthContextType {
@@ -61,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: decoded.email,
       role: (decoded.role || "").toLowerCase(),
       slug: slug,
+      plan: decoded.plan || "",
     };
 
     Cookies.set("barber.token", token, { expires: 7 });
